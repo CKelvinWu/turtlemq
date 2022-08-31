@@ -7,4 +7,6 @@ router.post('/init', queueControllers.init);
 
 router.post('/produce', queueControllers.produce);
 
+router.post('/consume', queueControllers.consume);
+
 module.exports = router;
