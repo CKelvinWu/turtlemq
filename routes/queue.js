@@ -5,4 +5,6 @@ const queueControllers = require('../controllers/queue');
 
 router.post('/init', queueControllers.init);
 
+router.post('/produce', queueControllers.produce);
+
 module.exports = router;
