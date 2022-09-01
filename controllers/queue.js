@@ -1,7 +1,7 @@
 const queueChannels = {};
 const queueInit = (queue, maxLength) => {
   queueChannels[queue] = {
-    queue: [],
+    queue: Array(maxLength).fill(null),
     maxLength,
     head: 0,
     tail: 0,
@@ -14,7 +14,7 @@ const init = (req, res) => {
   const maxLength = body.maxLength || 1000;
   if (!queueChannels[queue]) queueInit(queue, maxLength);
   console.log(queueChannels);
-  res.status(200).json({ success: true });
+  res.send({ success: true });
 };
 
 const produce = (req, res) => {
@@ -22,20 +22,20 @@ const produce = (req, res) => {
   const { queue, message } = body;
   try {
     const queueObj = queueChannels[queue];
-    const { maxLength, head, tail } = queueObj;
+    const { maxLength, head } = queueObj;
     const queueArray = queueObj.queue;
 
-    if ((head + 1) % maxLength === tail) {
-      return res.status(404).json({ success: false, msg: 'queue overflow' });
+    if (!(queueArray[head] === undefined || queueArray[head] === null)) {
+      return res.send({ success: false, msg: 'queue overflow' });
     }
+    queueArray[head] = message;
     queueObj.head = (head + 1) % maxLength;
-    queueArray[(head + 1) % maxLength] = message;
 
     console.log(`queueArray: ${JSON.stringify(queueChannels)} ,head: ${queueObj.head}`);
-    return res.status(200).json({ success: true });
+    return res.send({ success: true });
   } catch (error) {
     console.log(error);
-    return res.status(404).json({ success: false, msg: 'produce error' });
+    return res.send({ success: false, msg: 'produce error' });
   }
 };
 
@@ -44,21 +44,22 @@ const consume = (req, res) => {
   const { queue } = body;
   try {
     const queueObj = queueChannels[queue];
-    const { maxLength, head, tail } = queueObj;
+    const { maxLength, tail } = queueObj;
     const queueArray = queueObj.queue;
 
-    if (tail === head && !queueArray[tail]) {
-      return res.status(404).json({ success: true, msg: 'empty queue' });
+    if (queueArray[tail] === undefined || queueArray[tail] === null) {
+      return res.send({ success: true, msg: 'empty queue' });
     }
-    const message = queueArray[(tail + 1) % maxLength];
-    queueArray[(tail + 1) % maxLength] = null;
+
+    const message = queueArray[tail];
+    queueArray[tail] = null;
     queueObj.tail = (tail + 1) % maxLength;
 
     console.log(`queueArray: ${JSON.stringify(queueChannels)} ,tail: ${queueObj.tail}`);
-    return res.status(200).json({ success: true, message });
+    return res.send({ success: true, message });
   } catch (error) {
     console.log(error);
-    return res.status(404).json({ success: false, msg: 'consume error' });
+    return res.send({ success: false, msg: 'consume error' });
   }
 };
 
