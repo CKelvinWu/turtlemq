@@ -15,11 +15,11 @@ class Queue {
     this.isInitialized = true;
   }
 
-  forwordHead() {
+  forwardHead() {
     this.head = (this.head + 1) % this.maxLength;
   }
 
-  forwordTail() {
+  forwardTail() {
     this.tail = (this.tail + 1) % this.maxLength;
   }
 
@@ -28,7 +28,7 @@ class Queue {
       return false;
     }
     this.queue[this.head] = message;
-    this.forwordHead();
+    this.forwardHead();
     return true;
   }
 
@@ -38,29 +38,29 @@ class Queue {
     }
     const message = this.queue[this.tail];
     this.queue[this.tail] = null;
-    this.forwordTail();
+    this.forwardTail();
     return message;
   }
 }
 
 const queueChannels = {};
-const createQueue = (queue, maxLength = 0) => {
-  if (!queueChannels[queue]) {
-    queueChannels[queue] = new Queue(queue);
+const createQueue = (name, maxLength = 0) => {
+  if (!queueChannels[name]) {
+    queueChannels[name] = new Queue(name);
   }
-  if (!queueChannels[queue].isInitialized && maxLength) {
-    queueChannels[queue].setMaxLength(maxLength);
+  if (!queueChannels[name].isInitialized && maxLength) {
+    queueChannels[name].setMaxLength(maxLength);
   }
-  return queueChannels[queue];
+  return queueChannels[name];
 };
 
 const produce = (req, res) => {
   const { body } = req;
-  const { queue, message } = body;
+  const { queue: name, message } = body;
   try {
     // create queue if not exist
     const maxLength = body.maxLength || 1000;
-    const queueObj = createQueue(queue, maxLength);
+    const queueObj = createQueue(name, maxLength);
     const result = queueObj.produce(message);
     if (!result) {
       return res.send({ success: false, msg: 'queue overflow' });
@@ -75,9 +75,9 @@ const produce = (req, res) => {
 
 const consume = (req, res) => {
   const { body } = req;
-  const { queue } = body;
+  const { queue: name } = body;
   try {
-    const queueObj = createQueue(queue);
+    const queueObj = createQueue(name);
     if (!queueObj.isInitialized) {
       return res.send({ success: false, msg: 'queue not initialized' });
     }
