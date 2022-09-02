@@ -3,10 +3,12 @@ class Queue {
     this.name = name;
     this.isInitialized = false;
     this.consumer = [];
+    this.consumerPointer = 0;
     this.head = 0;
     this.tail = 0;
     this.maxLength = 0;
     this.queue = [];
+    this.triggerConsume = false;
   }
 
   setMaxLength(maxLength) {
@@ -34,12 +36,28 @@ class Queue {
 
   consume() {
     if (this.queue[this.tail] === undefined || this.queue[this.tail] === null) {
-      return false;
+      return null;
     }
     const message = this.queue[this.tail];
     this.queue[this.tail] = null;
     this.forwardTail();
     return message;
+  }
+
+  addConsumer(res) {
+    this.consumer.push(res);
+    if (!this.triggerConsume) {
+      setInterval(() => {
+        if (this.consumer[this.consumerPointer]) {
+          const message = this.consume();
+          if (message) {
+            this.consumer[this.consumerPointer].send({ success: true, msg: message });
+          }
+          this.consumerPointer = (this.consumerPointer + 1) % this.consumer.length;
+        }
+      }, 1000);
+      this.triggerConsume = true;
+    }
   }
 }
 
@@ -65,7 +83,7 @@ const produce = (req, res) => {
     if (!result) {
       return res.send({ success: false, msg: 'queue overflow' });
     }
-    console.log(`queueArray: ${JSON.stringify(queueObj.queue)} ,head: ${queueObj.head}`);
+    console.log(`Produce queueArray: ${JSON.stringify(queueObj.queue)}`);
     return res.send({ success: true });
   } catch (error) {
     console.log(error);
@@ -81,13 +99,9 @@ const consume = (req, res) => {
     if (!queueObj.isInitialized) {
       return res.send({ success: false, msg: 'queue not initialized' });
     }
-    const message = queueObj.consume();
-    if (!message) {
-      return res.send({ success: true, msg: 'empty queue' });
-    }
-
-    console.log(`queueArray: ${JSON.stringify(queueChannels)} ,tail: ${queueObj.tail}`);
-    return res.send({ success: true, message });
+    queueObj.addConsumer(res);
+    console.log(`Consume queueArray: ${JSON.stringify(queueChannels)}`);
+    return res.send({ success: true, msg: 'successifully subscribe' });
   } catch (error) {
     console.log(error);
     return res.send({ success: false, msg: 'consume error' });

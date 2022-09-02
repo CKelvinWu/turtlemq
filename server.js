@@ -57,8 +57,8 @@ function createWebServer(requestHandler) {
       // Send the request to the handler!
       requestHandler(request, response);
     });
-    socket.on('end', () => {
-      console.log('socket end ');
+    socket.on('error', () => {
+      console.log('socket error ');
     });
 
     socket.write('connected');
