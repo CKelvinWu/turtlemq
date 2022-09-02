@@ -1,37 +1,71 @@
-const queueChannels = {};
-const queueInit = (queue, maxLength) => {
-  queueChannels[queue] = {
-    queue: Array(maxLength).fill(null),
-    maxLength,
-    head: 0,
-    tail: 0,
-  };
-};
+class Queue {
+  constructor(name) {
+    this.name = name;
+    this.isInitialized = false;
+    this.consumer = [];
+    this.head = 0;
+    this.tail = 0;
+    this.maxLength = 0;
+    this.queue = [];
+  }
 
-const init = (req, res) => {
-  const { body } = req;
-  const { queue } = body;
-  const maxLength = body.maxLength || 1000;
-  if (!queueChannels[queue]) queueInit(queue, maxLength);
-  console.log(queueChannels);
-  res.send({ success: true });
+  setMaxLength(maxLength) {
+    this.maxLength = maxLength;
+    this.queue = Array(maxLength).fill(null);
+    this.isInitialized = true;
+  }
+
+  forwordHead() {
+    this.head = (this.head + 1) % this.maxLength;
+  }
+
+  forwordTail() {
+    this.tail = (this.tail + 1) % this.maxLength;
+  }
+
+  produce(message) {
+    if (!(this.queue[this.head] === undefined || this.queue[this.head] === null)) {
+      return false;
+    }
+    this.queue[this.head] = message;
+    this.forwordHead();
+    return true;
+  }
+
+  consume() {
+    if (this.queue[this.tail] === undefined || this.queue[this.tail] === null) {
+      return false;
+    }
+    const message = this.queue[this.tail];
+    this.queue[this.tail] = null;
+    this.forwordTail();
+    return message;
+  }
+}
+
+const queueChannels = {};
+const createQueue = (queue, maxLength = 0) => {
+  if (!queueChannels[queue]) {
+    queueChannels[queue] = new Queue(queue);
+  }
+  if (!queueChannels[queue].isInitialized && maxLength) {
+    queueChannels[queue].setMaxLength(maxLength);
+  }
+  return queueChannels[queue];
 };
 
 const produce = (req, res) => {
   const { body } = req;
   const { queue, message } = body;
   try {
-    const queueObj = queueChannels[queue];
-    const { maxLength, head } = queueObj;
-    const queueArray = queueObj.queue;
-
-    if (!(queueArray[head] === undefined || queueArray[head] === null)) {
+    // create queue if not exist
+    const maxLength = body.maxLength || 1000;
+    const queueObj = createQueue(queue, maxLength);
+    const result = queueObj.produce(message);
+    if (!result) {
       return res.send({ success: false, msg: 'queue overflow' });
     }
-    queueArray[head] = message;
-    queueObj.head = (head + 1) % maxLength;
-
-    console.log(`queueArray: ${JSON.stringify(queueChannels)} ,head: ${queueObj.head}`);
+    console.log(`queueArray: ${JSON.stringify(queueObj.queue)} ,head: ${queueObj.head}`);
     return res.send({ success: true });
   } catch (error) {
     console.log(error);
@@ -43,17 +77,14 @@ const consume = (req, res) => {
   const { body } = req;
   const { queue } = body;
   try {
-    const queueObj = queueChannels[queue];
-    const { maxLength, tail } = queueObj;
-    const queueArray = queueObj.queue;
-
-    if (queueArray[tail] === undefined || queueArray[tail] === null) {
+    const queueObj = createQueue(queue);
+    if (!queueObj.isInitialized) {
+      return res.send({ success: false, msg: 'queue not initialized' });
+    }
+    const message = queueObj.consume();
+    if (!message) {
       return res.send({ success: true, msg: 'empty queue' });
     }
-
-    const message = queueArray[tail];
-    queueArray[tail] = null;
-    queueObj.tail = (tail + 1) % maxLength;
 
     console.log(`queueArray: ${JSON.stringify(queueChannels)} ,tail: ${queueObj.tail}`);
     return res.send({ success: true, message });
@@ -63,4 +94,4 @@ const consume = (req, res) => {
   }
 };
 
-module.exports = { init, produce, consume };
+module.exports = { produce, consume };

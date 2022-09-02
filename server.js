@@ -60,6 +60,8 @@ function createWebServer(requestHandler) {
     socket.on('end', () => {
       console.log('socket end ');
     });
+
+    socket.write('connected');
   }
 
   server.on('connection', handleConnection);
