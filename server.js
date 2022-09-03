@@ -49,6 +49,7 @@ function createWebServer(requestHandler) {
       /* Response-related business */
       const response = {
         send(data) {
+          console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
           const message = `${JSON.stringify(data)}\r\n\r\n`;
           socket.write(message);
         },
@@ -61,7 +62,7 @@ function createWebServer(requestHandler) {
       console.log('socket error ');
     });
 
-    socket.write('connected');
+    socket.write('{ "message": "connected" }');
   }
 
   server.on('connection', handleConnection);

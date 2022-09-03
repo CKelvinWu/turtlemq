@@ -1,14 +1,20 @@
-class Queue {
+const EventEmitter = require('node:events');
+
+const queueChannels = {};
+class Queue extends EventEmitter {
   constructor(name) {
+    super();
     this.name = name;
     this.isInitialized = false;
-    this.consumer = [];
-    this.consumerPointer = 0;
+    this.subscribers = [];
     this.head = 0;
     this.tail = 0;
     this.maxLength = 0;
     this.queue = [];
-    this.triggerConsume = false;
+    this.on('consume', () => {
+      const res = this.subscribers.shift();
+      this.consume(res);
+    });
   }
 
   setMaxLength(maxLength) {
@@ -25,43 +31,37 @@ class Queue {
     this.tail = (this.tail + 1) % this.maxLength;
   }
 
-  produce(message) {
-    if (!(this.queue[this.head] === undefined || this.queue[this.head] === null)) {
+  produce(message, res) {
+    if (this.queue[this.head] !== null) {
+      res.send({ success: false, message: 'queue overflow' });
       return false;
     }
+    res.send({ success: true, message: 'produce message' });
     this.queue[this.head] = message;
     this.forwardHead();
+
+    console.log(`Consume queueArray: ${JSON.stringify(queueChannels.test.queue)}`);
+    if (this.subscribers.length) {
+      this.emit('consume');
+    }
     return true;
   }
 
-  consume() {
+  consume(res) {
+    // Hang the consumer if queue is empty
     if (this.queue[this.tail] === undefined || this.queue[this.tail] === null) {
+      this.subscribers.push(res);
       return null;
     }
     const message = this.queue[this.tail];
     this.queue[this.tail] = null;
     this.forwardTail();
+    res.send({ method: 'consume', success: true, message });
+    console.log(`Consume queueArray: ${JSON.stringify(queueChannels.test.queue)}`);
     return message;
-  }
-
-  addConsumer(res) {
-    this.consumer.push(res);
-    if (!this.triggerConsume) {
-      setInterval(() => {
-        if (this.consumer[this.consumerPointer]) {
-          const message = this.consume();
-          if (message) {
-            this.consumer[this.consumerPointer].send({ success: true, msg: message });
-          }
-          this.consumerPointer = (this.consumerPointer + 1) % this.consumer.length;
-        }
-      }, 1000);
-      this.triggerConsume = true;
-    }
   }
 }
 
-const queueChannels = {};
 const createQueue = (name, maxLength = 0) => {
   if (!queueChannels[name]) {
     queueChannels[name] = new Queue(name);
@@ -79,15 +79,11 @@ const produce = (req, res) => {
     // create queue if not exist
     const maxLength = body.maxLength || 1000;
     const queueObj = createQueue(name, maxLength);
-    const result = queueObj.produce(message);
-    if (!result) {
-      return res.send({ success: false, msg: 'queue overflow' });
-    }
-    console.log(`Produce queueArray: ${JSON.stringify(queueObj.queue)}`);
-    return res.send({ success: true });
+    return queueObj.produce(message, res);
+    // console.log(`Produce queueArray: ${JSON.stringify(queueObj.queue)}`);
   } catch (error) {
     console.log(error);
-    return res.send({ success: false, msg: 'produce error' });
+    return res.send({ success: false, message: 'produce error' });
   }
 };
 
@@ -96,15 +92,12 @@ const consume = (req, res) => {
   const { queue: name } = body;
   try {
     const queueObj = createQueue(name);
-    if (!queueObj.isInitialized) {
-      return res.send({ success: false, msg: 'queue not initialized' });
-    }
-    queueObj.addConsumer(res);
-    console.log(`Consume queueArray: ${JSON.stringify(queueChannels)}`);
-    return res.send({ success: true, msg: 'successifully subscribe' });
+    queueObj.consume(res);
+    // console.log(`Consume queueArray: ${JSON.stringify(queueChannels)}`);
+    return null;
   } catch (error) {
     console.log(error);
-    return res.send({ success: false, msg: 'consume error' });
+    return res.send({ success: false, message: 'consume error' });
   }
 };
 
