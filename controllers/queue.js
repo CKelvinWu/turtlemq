@@ -33,10 +33,20 @@ class Queue extends EventEmitter {
 
   produce(message, res) {
     if (this.queue[this.head] !== null) {
-      res.send({ success: false, message: 'queue overflow' });
+      res.send({
+        id: res.id,
+        method: 'produce',
+        success: false,
+        message: 'queue overflow',
+      });
       return false;
     }
-    res.send({ success: true, message: 'produce message' });
+    res.send({
+      id: res.id,
+      method: 'produce',
+      success: true,
+      message: 'produce message',
+    });
     this.queue[this.head] = message;
     this.forwardHead();
 
