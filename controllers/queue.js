@@ -40,7 +40,6 @@ class Queue extends EventEmitter {
     this.queue[this.head] = message;
     this.forwardHead();
 
-    console.log(`Consume queueArray: ${JSON.stringify(queueChannels.test.queue)}`);
     if (this.subscribers.length) {
       this.emit('consume');
     }
@@ -56,12 +55,19 @@ class Queue extends EventEmitter {
     const message = this.queue[this.tail];
     this.queue[this.tail] = null;
     this.forwardTail();
-    res.send({ method: 'consume', success: true, message });
+    res.send({
+      id: res.id,
+      method: 'consume',
+      queue: this.name,
+      success: true,
+      message,
+    });
     console.log(`Consume queueArray: ${JSON.stringify(queueChannels.test.queue)}`);
     return message;
   }
 }
 
+// create queue if not exist
 const createQueue = (name, maxLength = 0) => {
   if (!queueChannels[name]) {
     queueChannels[name] = new Queue(name);
@@ -76,11 +82,9 @@ const produce = (req, res) => {
   const { body } = req;
   const { queue: name, message } = body;
   try {
-    // create queue if not exist
     const maxLength = body.maxLength || 1000;
     const queueObj = createQueue(name, maxLength);
     return queueObj.produce(message, res);
-    // console.log(`Produce queueArray: ${JSON.stringify(queueObj.queue)}`);
   } catch (error) {
     console.log(error);
     return res.send({ success: false, message: 'produce error' });
@@ -93,7 +97,6 @@ const consume = (req, res) => {
   try {
     const queueObj = createQueue(name);
     queueObj.consume(res);
-    // console.log(`Consume queueArray: ${JSON.stringify(queueChannels)}`);
     return null;
   } catch (error) {
     console.log(error);

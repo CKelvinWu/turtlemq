@@ -62,7 +62,7 @@ function createWebServer(requestHandler) {
       console.log('socket error ');
     });
 
-    socket.write('{ "message": "connected" }');
+    socket.write('{ "message": "connected" }\r\n\r\n');
   }
 
   server.on('connection', handleConnection);
@@ -72,6 +72,7 @@ function createWebServer(requestHandler) {
 const webServer = createWebServer((req, res) => {
   console.log(`\n${new Date().toISOString()} - ${req.body.method} ${JSON.stringify(req.body)}`);
   const method = req.body.method.toLowerCase();
+  res.id = req.body.id;
   queueControllers[method](req, res);
 });
 
