@@ -58,6 +58,7 @@ class Queue extends EventEmitter {
       success: true,
       message: 'produce message',
     });
+    console.log(`Consume queue: ${JSON.stringify(messages)}`);
 
     if (this.subscribers.length) {
       this.emit('consume');
@@ -89,7 +90,7 @@ class Queue extends EventEmitter {
       success: true,
       messages,
     });
-    console.log(`Consume queueArray: ${JSON.stringify(queueChannels.test.queue)}`);
+    console.log(`Consume queue: ${JSON.stringify(messages)}`);
     return messages;
   }
 }
