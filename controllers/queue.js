@@ -1,11 +1,13 @@
+require('dotenv');
 const EventEmitter = require('node:events');
 
+const { DEFAULT_QUEUE_LENGTH } = process.env;
 const queueChannels = {};
 class Queue extends EventEmitter {
   constructor(name) {
     super();
     this.name = name;
-    this.isInitialized = false;
+    this.isSettedMaxLength = false;
     this.subscribers = [];
     this.head = 0;
     this.tail = 0;
@@ -20,7 +22,7 @@ class Queue extends EventEmitter {
   setMaxLength(maxLength) {
     this.maxLength = maxLength;
     this.queue = Array(maxLength).fill(null);
-    this.isInitialized = true;
+    this.isSettedMaxLength = true;
   }
 
   forwardHead() {
@@ -31,15 +33,24 @@ class Queue extends EventEmitter {
     this.tail = (this.tail + 1) % this.maxLength;
   }
 
-  produce(message, res) {
-    if (this.queue[this.head] !== null) {
-      res.send({
-        id: res.id,
-        method: 'produce',
-        success: false,
-        message: 'queue overflow',
-      });
-      return false;
+  produce(messages, res) {
+    // check if queue has enough space
+    for (let i = this.head; i < messages.length; ++i % this.maxLength) {
+      if (this.queue[i] !== null) {
+        res.send({
+          id: res.id,
+          method: 'produce',
+          success: false,
+          message: 'queue overflow',
+        });
+        return false;
+      }
+    }
+
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i];
+      this.queue[this.head] = message;
+      this.forwardHead();
     }
     res.send({
       id: res.id,
@@ -47,8 +58,6 @@ class Queue extends EventEmitter {
       success: true,
       message: 'produce message',
     });
-    this.queue[this.head] = message;
-    this.forwardHead();
 
     if (this.subscribers.length) {
       this.emit('consume');
@@ -62,18 +71,26 @@ class Queue extends EventEmitter {
       this.subscribers.push(res);
       return null;
     }
-    const message = this.queue[this.tail];
-    this.queue[this.tail] = null;
-    this.forwardTail();
+
+    const messages = [];
+    for (let i = 0; i < res.body.nums; i++) {
+      if (!this.queue[this.tail]) {
+        break;
+      }
+      messages.push(this.queue[this.tail]);
+      this.queue[this.tail] = null;
+      this.forwardTail();
+    }
+
     res.send({
       id: res.id,
       method: 'consume',
       queue: this.name,
       success: true,
-      message,
+      messages,
     });
     console.log(`Consume queueArray: ${JSON.stringify(queueChannels.test.queue)}`);
-    return message;
+    return messages;
   }
 }
 
@@ -82,7 +99,7 @@ const createQueue = (name, maxLength = 0) => {
   if (!queueChannels[name]) {
     queueChannels[name] = new Queue(name);
   }
-  if (!queueChannels[name].isInitialized && maxLength) {
+  if (!queueChannels[name].isSettedMaxLength && maxLength) {
     queueChannels[name].setMaxLength(maxLength);
   }
   return queueChannels[name];
@@ -90,11 +107,11 @@ const createQueue = (name, maxLength = 0) => {
 
 const produce = (req, res) => {
   const { body } = req;
-  const { queue: name, message } = body;
+  const { queue: name, messages } = body;
   try {
-    const maxLength = body.maxLength || 1000;
+    const maxLength = body.maxLength || +DEFAULT_QUEUE_LENGTH;
     const queueObj = createQueue(name, maxLength);
-    return queueObj.produce(message, res);
+    return queueObj.produce(messages, res);
   } catch (error) {
     console.log(error);
     return res.send({ success: false, message: 'produce error' });

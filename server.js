@@ -48,6 +48,7 @@ function createWebServer(requestHandler) {
 
       /* Response-related business */
       const response = {
+        body,
         send(data) {
           console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
           const message = `${JSON.stringify(data)}\r\n\r\n`;
@@ -70,7 +71,7 @@ function createWebServer(requestHandler) {
 }
 
 const webServer = createWebServer((req, res) => {
-  console.log(`\n${new Date().toISOString()} - ${req.body.method} ${JSON.stringify(req.body)}`);
+  console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
   const method = req.body.method.toLowerCase();
   res.id = req.body.id;
   queueControllers[method](req, res);
