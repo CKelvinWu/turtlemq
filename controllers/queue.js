@@ -58,7 +58,7 @@ class Queue extends EventEmitter {
       success: true,
       message: 'produce message',
     });
-    console.log(`Consume queue: ${JSON.stringify(messages)}`);
+    console.log(`Produce queue: ${JSON.stringify(messages)}`);
 
     if (this.subscribers.length) {
       this.emit('consume');
