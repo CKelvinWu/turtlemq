@@ -14,8 +14,8 @@ class Queue extends EventEmitter {
     this.maxLength = 0;
     this.queue = [];
     this.on('consume', () => {
-      const res = this.subscribers.shift();
-      this.consume(res);
+      const req = this.subscribers.shift();
+      this.consume(req);
     });
   }
 
@@ -33,12 +33,12 @@ class Queue extends EventEmitter {
     this.tail = (this.tail + 1) % this.maxLength;
   }
 
-  produce(messages, res) {
+  produce(messages, req) {
     // check if queue has enough space
     for (let i = this.head; i < messages.length; ++i % this.maxLength) {
       if (this.queue[i] !== null) {
-        res.send({
-          id: res.id,
+        req.send({
+          id: req.body.id,
           method: 'produce',
           success: false,
           message: 'queue overflow',
@@ -52,8 +52,8 @@ class Queue extends EventEmitter {
       this.queue[this.head] = message;
       this.forwardHead();
     }
-    res.send({
-      id: res.id,
+    req.send({
+      id: req.body.id,
       method: 'produce',
       success: true,
       message: 'produce message',
@@ -66,15 +66,15 @@ class Queue extends EventEmitter {
     return true;
   }
 
-  consume(res) {
+  consume(req) {
     // Hang the consumer if queue is empty
     if (this.queue[this.tail] === undefined || this.queue[this.tail] === null) {
-      this.subscribers.push(res);
+      this.subscribers.push(req);
       return null;
     }
 
     const messages = [];
-    for (let i = 0; i < res.body.nums; i++) {
+    for (let i = 0; i < req.body.nums; i++) {
       if (!this.queue[this.tail]) {
         break;
       }
@@ -83,8 +83,8 @@ class Queue extends EventEmitter {
       this.forwardTail();
     }
 
-    res.send({
-      id: res.id,
+    req.send({
+      id: req.body.id,
       method: 'consume',
       queue: this.name,
       success: true,
@@ -106,29 +106,29 @@ const createQueue = (name, maxLength = 0) => {
   return queueChannels[name];
 };
 
-const produce = (req, res) => {
+const produce = (req) => {
   const { body } = req;
   const { queue: name, messages } = body;
   try {
     const maxLength = body.maxLength || +DEFAULT_QUEUE_LENGTH;
     const queueObj = createQueue(name, maxLength);
-    return queueObj.produce(messages, res);
+    return queueObj.produce(messages, req);
   } catch (error) {
     console.log(error);
-    return res.send({ success: false, message: 'produce error' });
+    return req.send({ success: false, message: 'produce error' });
   }
 };
 
-const consume = (req, res) => {
+const consume = (req) => {
   const { body } = req;
   const { queue: name } = body;
   try {
     const queueObj = createQueue(name);
-    queueObj.consume(res);
+    queueObj.consume(req);
     return null;
   } catch (error) {
     console.log(error);
-    return res.send({ success: false, message: 'consume error' });
+    return req.send({ success: false, message: 'consume error' });
   }
 };
 

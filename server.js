@@ -1,20 +1,27 @@
 require('dotenv').config();
 const net = require('net');
 const queueControllers = require('./controllers/queue');
+const Group = require('./group');
+const { getCurrentIp } = require('./util');
+
+const group = new Group();
+(async () => {
+  await group.init();
+})();
 
 const { PORT } = process.env;
 
-function createWebServer(requestHandler) {
+function createTurtleMQServer(requestHandler) {
   const server = net.createServer((connection) => {
     connection.on('error', () => {
       console.log('client disconnect forcefully');
     });
     connection.on('end', () => {
-      console.log('client disconnect');
+      // console.log('client disconnect');
     });
   });
 
-  function handleConnection(socket) {
+  function connectionHandler(socket) {
     socket.on('readable', () => {
       let reqBuffer = Buffer.from('');
       let buf;
@@ -39,25 +46,22 @@ function createWebServer(requestHandler) {
 
       if (!reqHeader) return;
 
-      /* Request-related business */
       const body = JSON.parse(reqHeader);
       const request = {
         body,
         socket,
-      };
-
-      /* Response-related business */
-      const response = {
-        body,
         send(data) {
           console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
           const message = `${JSON.stringify(data)}\r\n\r\n`;
           socket.write(message);
         },
+        end() {
+          socket.end();
+        },
       };
 
-      // Send the request to the handler!
-      requestHandler(request, response);
+      // Send the request to the handler
+      requestHandler(request);
     });
     socket.on('error', () => {
       console.log('socket error ');
@@ -66,15 +70,26 @@ function createWebServer(requestHandler) {
     socket.write('{ "message": "connected" }\r\n\r\n');
   }
 
-  server.on('connection', handleConnection);
+  server.on('connection', connectionHandler);
   return server;
 }
 
-const webServer = createWebServer((req, res) => {
+const webServer = createTurtleMQServer(async (req) => {
   console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
   const method = req.body.method.toLowerCase();
-  res.id = req.body.id;
-  queueControllers[method](req, res);
+
+  // response self role only
+  if (method === 'heartbeat') {
+    const ip = await getCurrentIp();
+    return req.send({
+      success: true,
+      id: req.body.id,
+      role: group.role,
+      method,
+      ip,
+    });
+  }
+  return queueControllers[method](req);
 });
 
 webServer.listen(PORT, () => {
