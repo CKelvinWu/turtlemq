@@ -1,8 +1,8 @@
 require('dotenv');
 const EventEmitter = require('node:events');
+const group = require('./group');
 
 const { DEFAULT_QUEUE_LENGTH } = process.env;
-const queueChannels = {};
 class Queue extends EventEmitter {
   constructor(name) {
     super();
@@ -97,13 +97,13 @@ class Queue extends EventEmitter {
 
 // create queue if not exist
 const createQueue = (name, maxLength = 0) => {
-  if (!queueChannels[name]) {
-    queueChannels[name] = new Queue(name);
+  if (!group.queueChannels[name]) {
+    group.queueChannels[name] = new Queue(name);
   }
-  if (!queueChannels[name].isSettedMaxLength && maxLength) {
-    queueChannels[name].setMaxLength(maxLength);
+  if (!group.queueChannels[name].isSettedMaxLength && maxLength) {
+    group.queueChannels[name].setMaxLength(maxLength);
   }
-  return queueChannels[name];
+  return group.queueChannels[name];
 };
 
 const produce = (req) => {
@@ -132,4 +132,20 @@ const consume = (req) => {
   }
 };
 
-module.exports = { produce, consume };
+const setqueue = (req) => {
+  const { queueChannels } = req.body;
+  Object.keys(queueChannels).forEach((key) => {
+    const {
+      maxLength, queue, head, tail,
+    } = queueChannels[key];
+    const queueObj = createQueue(key, maxLength);
+    queueObj.produce(queue, req);
+    group.queueChannels[key].head = head;
+    group.queueChannels[key].tail = tail;
+    console.log(queueChannels[key].maxLength);
+    console.log(queueChannels[key].queue);
+  });
+  return req.send({ success: true, message: 'set queue successifully' });
+};
+
+module.exports = { produce, consume, setqueue };
