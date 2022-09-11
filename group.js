@@ -1,68 +1,77 @@
-require('dotenv').config();
-const { redis } = require('./redis');
-const { getCurrentIp } = require('./util');
-
 const {
-  MASTER_KEY, STATE_KEY, REPLICA_KEY, CHANNEL,
-} = process.env;
+  stringToHostAndPort, getCurrentIp, getState, getMaster, setMaster,
+  setReplica, setState, publishToChannel, getReplicasConfig,
+} = require('./util');
+const Turtlekeeper = require('./connection');
 
-module.exports = class Group {
-  constructor(master, replicas, turtlekeepers) {
-    // this.role = '';
-    this.master = master;
-    this.replicas = new Set(replicas);
-    this.turtlekeepers = new Set(turtlekeepers);
+async function createConnection(config) {
+  const turtleKeeper = new Turtlekeeper(config);
+  const connection = await turtleKeeper.connect();
+  return connection;
+}
+
+class Group {
+  constructor() {
+    this.queueChannels = {};
+    this.connections = [];
   }
 
   async init() {
-    // FIXME: shuld handle race condition
-
+    // FIXME: shuld handle race condition and unhealthy replica
     this.ip = await getCurrentIp();
-    const master = await redis.get(MASTER_KEY);
-    if (master) {
-      // check replica
-      this.role = 'replica';
-      await redis.set(`turtlemq:replica:${this.ip}`, this.ip);
-      await redis.hset(REPLICA_KEY, this.ip, 1);
-      const message = { method: 'join', ip: this.ip };
-      await redis.publish(CHANNEL, JSON.stringify(message));
+    const state = await getState();
+    if (state && state !== 'active') return;
+
+    const master = await getMaster();
+    if (!state || master === this.ip) {
+      await setMaster(this.ip);
+      await setState('active');
+      this.role = 'master';
+      const message = { method: 'join', ip: this.ip, role: this.role };
+      await publishToChannel(message);
       return;
     }
-    await redis.set(MASTER_KEY, this.ip);
-    await redis.set(STATE_KEY, 'active');
-
-    this.role = 'master';
+    // check replica
+    this.role = 'replica';
+    // await redis.set(`turtlemq:replica:${this.ip}`, this.ip);
+    await setReplica(this.ip);
+    const message = { method: 'join', ip: this.ip, role: this.role };
+    await publishToChannel(message);
   }
 
-  replicasLength() {
-    return Array.from(this.replicas).length;
+  async createReplicaConnections() {
+    if (this.role !== 'master') {
+      return;
+    }
+    const replicasConfig = await getReplicasConfig();
+    replicasConfig.forEach(async (replicaConfig) => {
+      const connection = await createConnection(replicaConfig);
+      this.connections.push(connection);
+      this.setQueue(connection);
+    });
   }
 
-  turtlekeepersLength() {
-    return Array.from(this.turtlekeepers).length;
+  async createReplicaConnection(ip) {
+    if (this.role !== 'master') {
+      return;
+    }
+    const replicaConfig = stringToHostAndPort(ip);
+    const connection = await createConnection(replicaConfig);
+    this.connections.push(connection);
+    this.setQueue(connection);
   }
 
-  getReplicas() {
-    return Array.from(this.replicas);
+  setQueue(connection) {
+    const message = { method: 'setqueue', queueChannels: this.queueChannels };
+    connection.send(message);
   }
 
-  getTurtlekeepers() {
-    return Array.from(this.turtlekeepers);
+  async send(message) {
+    for (let i = 0; i < this.connections.length; i++) {
+      const connection = this.connections[i];
+      connection.send(message);
+    }
   }
-
-  addReplicas(replica) {
-    this.replicas.add(replica);
-  }
-
-  addTurtlekeepers(turtlekeeper) {
-    this.turtlekeepers.add(turtlekeeper);
-  }
-
-  removeReplicas(replica) {
-    this.replicas.delete(replica);
-  }
-
-  removeTurtlekeepers(Turtlekeeper) {
-    this.Turtlekeepers.delete(Turtlekeeper);
-  }
-};
+}
+const group = new Group();
+module.exports = group;

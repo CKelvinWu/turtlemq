@@ -1,15 +1,40 @@
 require('dotenv').config();
 const net = require('net');
-const queueControllers = require('./controllers/queue');
-const Group = require('./group');
-const { getCurrentIp } = require('./util');
+const queueRoutes = require('./queue');
+const group = require('./group');
+const { redis } = require('./redis');
+const { ip, getReqHeader } = require('./util');
 
-const group = new Group();
+const { PORT, CHANNEL } = process.env;
+
+// const group = new Group();
 (async () => {
   await group.init();
+  await group.createReplicaConnections();
 })();
 
-const { PORT } = process.env;
+const subscriber = redis.duplicate();
+subscriber.subscribe(CHANNEL, () => {
+  console.log(`subscribe channel: ${CHANNEL}`);
+});
+
+subscriber.on('message', async (channel, message) => {
+  const data = JSON.parse(message);
+  const { method } = data;
+  if (method === 'setMaster') {
+    if (ip === data.ip) {
+      group.role = 'master';
+      console.log('\n====================\nI am the new master\n====================\n');
+      // create connection to all replicas
+      await group.createReplicaConnections();
+    }
+  } else if (method === 'join') {
+    if (group.role === 'master' && data.role !== 'master') {
+      // Create a connection to new replica
+      await group.createReplicaConnection(data.ip);
+    }
+  }
+});
 
 function createTurtleMQServer(requestHandler) {
   const server = net.createServer((connection) => {
@@ -23,26 +48,7 @@ function createTurtleMQServer(requestHandler) {
 
   function connectionHandler(socket) {
     socket.on('readable', () => {
-      let reqBuffer = Buffer.from('');
-      let buf;
-      let reqHeader;
-      while (true) {
-        buf = socket.read();
-        if (buf === null) break;
-
-        reqBuffer = Buffer.concat([reqBuffer, buf]);
-
-        // Indicating end of a request
-        const marker = reqBuffer.indexOf('\r\n\r\n');
-        if (marker !== -1) {
-          // Record the data after \r\n\r\n
-          const remaining = reqBuffer.slice(marker + 4);
-          reqHeader = reqBuffer.slice(0, marker).toString();
-          // Push the extra readed data back to the socket's readable stream
-          socket.unshift(remaining);
-          break;
-        }
-      }
+      const reqHeader = getReqHeader(socket);
 
       if (!reqHeader) return;
 
@@ -80,7 +86,6 @@ const webServer = createTurtleMQServer(async (req) => {
 
   // response self role only
   if (method === 'heartbeat') {
-    const ip = await getCurrentIp();
     return req.send({
       success: true,
       id: req.body.id,
@@ -89,7 +94,10 @@ const webServer = createTurtleMQServer(async (req) => {
       ip,
     });
   }
-  return queueControllers[method](req);
+  if (group.role === 'master') {
+    group.send(req.body);
+  }
+  return queueRoutes[method](req);
 });
 
 webServer.listen(PORT, () => {
