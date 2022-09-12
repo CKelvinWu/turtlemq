@@ -57,6 +57,7 @@ class Queue extends EventEmitter {
       method: 'produce',
       success: true,
       message: 'produce message',
+      messages,
     });
     console.log(`Produce queue: ${JSON.stringify(messages)}`);
 
@@ -142,8 +143,6 @@ const setqueue = (req) => {
     queueObj.produce(queue, req);
     group.queueChannels[key].head = head;
     group.queueChannels[key].tail = tail;
-    console.log(queueChannels[key].maxLength);
-    console.log(queueChannels[key].queue);
   });
   return req.send({ success: true, message: 'set queue successifully' });
 };

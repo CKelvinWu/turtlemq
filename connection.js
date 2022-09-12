@@ -26,7 +26,7 @@ class Turtlekeeper {
     return new Promise((resolve, reject) => {
       const client = net.connect(this.config);
 
-      client.once('readable', async () => {
+      client.once('readable', () => {
         const reqHeader = getReqHeader(client);
         if (!reqHeader) return;
         const object = JSON.parse(reqHeader);

@@ -1,9 +1,11 @@
+const crypto = require('crypto');
 const {
   stringToHostAndPort, getCurrentIp, getState, getMaster, setMaster,
   setReplica, setState, publishToChannel, getReplicasConfig,
 } = require('./util');
 const Turtlekeeper = require('./connection');
 
+const randomId = () => crypto.randomBytes(8).toString('hex');
 async function createConnection(config) {
   const turtleKeeper = new Turtlekeeper(config);
   const connection = await turtleKeeper.connect();
@@ -14,6 +16,7 @@ class Group {
   constructor() {
     this.queueChannels = {};
     this.connections = [];
+    this.id = randomId();
   }
 
   async init() {
@@ -62,7 +65,7 @@ class Group {
   }
 
   setQueue(connection) {
-    const message = { method: 'setqueue', queueChannels: this.queueChannels };
+    const message = { id: this.id, method: 'setqueue', queueChannels: this.queueChannels };
     connection.send(message);
   }
 
