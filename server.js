@@ -3,7 +3,7 @@ const net = require('net');
 const queueRoutes = require('./queue');
 const group = require('./group');
 const { redis } = require('./redis');
-const { ip, getReqHeader } = require('./util');
+const { getCurrentIp, getReqHeader } = require('./util');
 
 const { PORT, CHANNEL } = process.env;
 
@@ -22,6 +22,7 @@ subscriber.on('message', async (channel, message) => {
   const data = JSON.parse(message);
   const { method } = data;
   if (method === 'setMaster') {
+    const ip = await getCurrentIp();
     if (ip === data.ip) {
       group.role = 'master';
       console.log('\n====================\nI am the new master\n====================\n');
@@ -83,7 +84,7 @@ function createTurtleMQServer(requestHandler) {
 const webServer = createTurtleMQServer(async (req) => {
   console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
   const method = req.body.method.toLowerCase();
-
+  const ip = await getCurrentIp();
   // response self role only
   if (method === 'heartbeat') {
     return req.send({
