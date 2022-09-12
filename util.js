@@ -11,7 +11,8 @@ async function getCurrentIp() {
     http.get({ host: 'api.ipify.org', port: 80, path: '/' }, (res) => {
       res.on('data', (ip) => {
         console.log(`My public IP address is: ${ip}`);
-        resolve(`${ip}:${PORT}`);
+        resolve(`localhost:${PORT}`);
+        // resolve(`${ip}:${PORT}`);
       });
     }).end();
   });

@@ -76,9 +76,6 @@ class Queue extends EventEmitter {
 
     const messages = [];
     for (let i = 0; i < req.body.nums; i++) {
-      if (!this.queue[this.tail]) {
-        break;
-      }
       messages.push(this.queue[this.tail]);
       this.queue[this.tail] = null;
       this.forwardTail();
