@@ -3,7 +3,7 @@ require('dotenv').config();
 const { redis } = require('./redis');
 
 const {
-  PORT, STATE_KEY, MASTER_KEY, REPLICA_KEY, CHANNEL,
+  NODE_ENV, PORT, STATE_KEY, MASTER_KEY, REPLICA_KEY, CHANNEL,
 } = process.env;
 
 async function getCurrentIp() {
@@ -11,8 +11,10 @@ async function getCurrentIp() {
     http.get({ host: 'api.ipify.org', port: 80, path: '/' }, (res) => {
       res.on('data', (ip) => {
         console.log(`My public IP address is: ${ip}`);
-        resolve(`localhost:${PORT}`);
-        // resolve(`${ip}:${PORT}`);
+        if (NODE_ENV === 'development') {
+          resolve(`localhost:${PORT}`);
+        }
+        resolve(`${ip}:${PORT}`);
       });
     }).end();
   });
