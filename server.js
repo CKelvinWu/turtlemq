@@ -84,6 +84,7 @@ function createTurtleMQServer(requestHandler) {
 const webServer = createTurtleMQServer(async (req) => {
   console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
   const method = req.body.method.toLowerCase();
+  req.role = group.role;
   // response self role only
   if (method === 'heartbeat') {
     return req.send({

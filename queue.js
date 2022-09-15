@@ -150,7 +150,9 @@ const produce = (req) => {
     const maxLength = body.maxLength || +DEFAULT_QUEUE_LENGTH;
     const queueObj = createQueue(name, maxLength);
     queueObj.produce(messages, req);
-    saveHistory(name, queueObj.getQueueLength());
+    if (req.role === 'master') {
+      saveHistory(name, queueObj.getQueueLength());
+    }
     return;
   } catch (error) {
     console.log(error);
@@ -164,7 +166,9 @@ const consume = (req) => {
   try {
     const queueObj = createQueue(name);
     queueObj.consume(req);
-    saveHistory(name, queueObj.getQueueLength());
+    if (req.role === 'master') {
+      saveHistory(name, queueObj.getQueueLength());
+    }
     return;
   } catch (error) {
     console.log(error);
