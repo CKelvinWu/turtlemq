@@ -116,7 +116,7 @@ const saveHistory = async (name, queueSize) => {
   // first history
   if (!latestHistory) {
     const history = { time: Date.now(), queueSize };
-    await redis.rpush(historyKey, -1, JSON.stringify(history));
+    await redis.rpush(historyKey, JSON.stringify(history));
     return;
   }
 
