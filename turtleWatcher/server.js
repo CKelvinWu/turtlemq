@@ -2,10 +2,14 @@ require('dotenv').config();
 const express = require('express');
 
 const { PORT } = process.env;
+const indexRouter = require('./routes/index');
 
 const app = express();
 
 app.use(express.json());
+app.set('view engine', 'pug');
+
+app.use('/', indexRouter);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
