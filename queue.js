@@ -3,7 +3,9 @@ const EventEmitter = require('node:events');
 const { redis } = require('./redis');
 const group = require('./group');
 
-const { DEFAULT_QUEUE_LENGTH, HISTORY_KEY, HISTORY_INTERVAL } = process.env;
+const {
+  DEFAULT_QUEUE_LENGTH, HISTORY_KEY, HISTORY_INTERVAL, QUEUE_LIST,
+} = process.env;
 
 class Queue extends EventEmitter {
   constructor(name) {
@@ -108,6 +110,7 @@ class Queue extends EventEmitter {
   }
 }
 const saveHistory = async (name, queueSize) => {
+  redis.sadd(QUEUE_LIST, name);
   const historyKey = HISTORY_KEY + name;
   const latestHistory = await redis.lindex(historyKey, -1);
   // first history
