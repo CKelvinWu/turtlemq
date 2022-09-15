@@ -7,6 +7,8 @@ $(() => {
   // be fetched from a server
   let j = 0;
   let data = [];
+
+  let data2 = [];
   const totalPoints = 150;
   function getRandomData() {
     if (data.length > 0) {
@@ -27,6 +29,28 @@ $(() => {
     const res = [];
     for (let i = j; i < j + data.length; ++i) {
       res.push([i, data[i - j]]);
+    }
+    return res;
+  }
+  function getRandomData2() {
+    if (data2.length > 0) {
+      data2 = data2.slice(1);
+    }
+    // Do a random walk
+    while (data2.length < totalPoints) {
+      const prev = data2.length > 0 ? data2[data2.length - 1] : 50;
+      let y = prev + Math.random() * 20 - 5;
+      if (y < 0) {
+        y = 0;
+      } else if (y > 100) {
+        y = 100;
+      }
+      data2.push(y);
+    }
+    // Zip the generated y values with the x values
+    const res = [];
+    for (let i = j; i < j + data2.length; ++i) {
+      res.push([i, data2[i - j]]);
     }
     return res;
   }
@@ -79,7 +103,7 @@ $(() => {
         },
       },
     );
-    interactivePlot.setData([getRandomData()]);
+    interactivePlot.setData([getRandomData(), getRandomData2()]);
     // Since the axes don't change, we don't need to call plot.setupGrid()
     interactivePlot.draw();
     if (realtime === 'on') {

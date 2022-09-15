@@ -1,8 +1,10 @@
 require('dotenv');
 const EventEmitter = require('node:events');
+const { redis } = require('./redis');
 const group = require('./group');
 
-const { DEFAULT_QUEUE_LENGTH } = process.env;
+const { DEFAULT_QUEUE_LENGTH, HISTORY_KEY, HISTORY_INTERVAL } = process.env;
+
 class Queue extends EventEmitter {
   constructor(name) {
     super();
@@ -33,10 +35,20 @@ class Queue extends EventEmitter {
     this.tail = (this.tail + 1) % this.maxLength;
   }
 
+  getQueueLength() {
+    const { head, tail, maxLength } = this;
+    // Either empty of overflow
+    if (head === tail) {
+      return this.queue[head] !== null ? maxLength : 0;
+    }
+    return ((head - tail + maxLength) % maxLength);
+  }
+
   produce(messages, req) {
     // check if queue has enough space
-    for (let i = this.head; i < messages.length; ++i % this.maxLength) {
-      if (this.queue[i] !== null) {
+    const { head, maxLength } = this;
+    for (let i = head; i < messages.length + head; i++) {
+      if (this.queue[i % maxLength] !== null) {
         req.send({
           id: req.body.id,
           method: 'produce',
@@ -49,7 +61,7 @@ class Queue extends EventEmitter {
 
     for (let i = 0; i < messages.length; i++) {
       const message = messages[i];
-      this.queue[this.head] = message;
+      this.queue[head] = message;
       this.forwardHead();
     }
     req.send({
@@ -76,6 +88,9 @@ class Queue extends EventEmitter {
 
     const messages = [];
     for (let i = 0; i < req.body.nums; i++) {
+      if (this.queue[this.tail] === null) {
+        break;
+      }
       messages.push(this.queue[this.tail]);
       this.queue[this.tail] = null;
       this.forwardTail();
@@ -92,6 +107,27 @@ class Queue extends EventEmitter {
     return messages;
   }
 }
+const saveHistory = async (name, queueSize) => {
+  const historyKey = HISTORY_KEY + name;
+  const latestHistory = await redis.lindex(historyKey, -1);
+  // first history
+  if (!latestHistory) {
+    const history = { time: Date.now(), queueSize };
+    await redis.rpush(historyKey, -1, JSON.stringify(history));
+    return;
+  }
+
+  // history exceed interval
+  const { time } = JSON.parse(latestHistory);
+  if (Date.now() - time > HISTORY_INTERVAL) {
+    const history = { time: Date.now(), queueSize };
+    await redis.rpush(historyKey, JSON.stringify(history));
+    return;
+  }
+  // update history in interval
+  const history = { time, queueSize };
+  await redis.lset(historyKey, -1, JSON.stringify(history));
+};
 
 // create queue if not exist
 const createQueue = (name, maxLength = 0) => {
@@ -110,10 +146,12 @@ const produce = (req) => {
   try {
     const maxLength = body.maxLength || +DEFAULT_QUEUE_LENGTH;
     const queueObj = createQueue(name, maxLength);
-    return queueObj.produce(messages, req);
+    queueObj.produce(messages, req);
+    saveHistory(name, queueObj.getQueueLength());
+    return;
   } catch (error) {
     console.log(error);
-    return req.send({ success: false, message: 'produce error' });
+    req.send({ success: false, message: 'produce error' });
   }
 };
 
@@ -123,10 +161,11 @@ const consume = (req) => {
   try {
     const queueObj = createQueue(name);
     queueObj.consume(req);
-    return null;
+    saveHistory(name, queueObj.getQueueLength());
+    return;
   } catch (error) {
     console.log(error);
-    return req.send({ success: false, message: 'consume error' });
+    req.send({ success: false, message: 'consume error' });
   }
 };
 
