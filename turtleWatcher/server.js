@@ -1,8 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 
-const { PORT } = process.env;
+const { PORT, API_VERSION } = process.env;
 const indexRouter = require('./routes/index');
+const queueRouter = require('./routes/queue');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.set('view engine', 'pug');
 app.use('/public', express.static('./public'));
 
 app.use('/', indexRouter);
+app.use(`/api/${API_VERSION}/queue`, queueRouter);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
