@@ -109,27 +109,38 @@ class Queue extends EventEmitter {
     return messages;
   }
 }
-const saveHistory = async (name, queueSize) => {
-  redis.sadd(QUEUE_LIST, name);
-  const historyKey = HISTORY_KEY + name;
-  const latestHistory = await redis.lindex(historyKey, -1);
-  // first history
-  if (!latestHistory) {
-    const history = { time: Date.now(), queueSize };
-    await redis.rpush(historyKey, JSON.stringify(history));
-    return;
-  }
 
-  // history exceed interval
-  const { time } = JSON.parse(latestHistory);
-  if (Date.now() - time > HISTORY_INTERVAL) {
-    const history = { time: Date.now(), queueSize };
-    await redis.rpush(historyKey, JSON.stringify(history));
+const saveHistory = async () => {
+  if (group.role !== 'master') {
     return;
   }
-  // update history in interval
-  const history = { time, queueSize };
-  await redis.lset(historyKey, -1, JSON.stringify(history));
+  const keys = Object.keys(group.queueChannels);
+  keys.forEach(async (name) => {
+    const queueSize = group.queueChannels[name].getQueueLength();
+    redis.sadd(QUEUE_LIST, name);
+    const historyKey = HISTORY_KEY + name;
+    const latestHistory = await redis.lindex(historyKey, -1);
+    // first history
+    if (!latestHistory) {
+      const history = { time: Date.now(), queueSize };
+      await redis.rpush(historyKey, JSON.stringify(history));
+      return;
+    }
+
+    // history exceed interval
+    const { time } = JSON.parse(latestHistory);
+    if (Date.now() - time > HISTORY_INTERVAL) {
+      const history = { time: Date.now(), queueSize };
+      await redis.rpush(historyKey, JSON.stringify(history));
+      return;
+    }
+    // update history in interval
+    const history = { time, queueSize };
+    await redis.lset(historyKey, -1, JSON.stringify(history));
+  });
+  setTimeout(() => {
+    saveHistory();
+  }, 5000);
 };
 
 // create queue if not exist
@@ -190,13 +201,6 @@ const setqueue = (req) => {
   return req.send({ success: true, message: 'set queue successifully' });
 };
 
-setInterval(() => {
-  if (group.role !== 'master') {
-    return;
-  }
-  const keys = Object.keys(group.queueChannels);
-  keys.forEach((name) => {
-    saveHistory(name, group.queueChannels[name].getQueueLength());
-  });
-}, 5000);
+saveHistory();
+
 module.exports = { produce, consume, setqueue };

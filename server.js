@@ -3,9 +3,9 @@ const net = require('net');
 const queueRoutes = require('./queue');
 const group = require('./group');
 const { redis } = require('./redis');
-const { getCurrentIp, getReqHeader } = require('./util');
+const { getCurrentIp, getReqHeader, deleteQUeue } = require('./util');
 
-const { PORT, CHANNEL } = process.env;
+const { PORT, CHANNEL, QUEUE_LIST } = process.env;
 let ip;
 
 (async () => {
@@ -28,6 +28,13 @@ subscriber.on('message', async (channel, message) => {
       console.log('\n====================\nI am the new master\n====================\n');
       // create connection to all replicas
       await group.createReplicaConnections();
+
+      const queueList = await redis.smembers(QUEUE_LIST);
+      const keys = Object.keys(group.queueChannels);
+      const removeKeys = queueList.filter((queue) => !keys.includes(queue));
+      for (const key of removeKeys) {
+        deleteQUeue(key);
+      }
     }
   } else if (method === 'join') {
     if (group.role === 'master' && data.role !== 'master') {

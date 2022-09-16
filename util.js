@@ -3,7 +3,7 @@ require('dotenv').config();
 const { redis } = require('./redis');
 
 const {
-  NODE_ENV, PORT, STATE_KEY, MASTER_KEY, REPLICA_KEY, CHANNEL,
+  NODE_ENV, PORT, STATE_KEY, MASTER_KEY, REPLICA_KEY, CHANNEL, QUEUE_LIST, HISTORY_KEY,
 } = process.env;
 
 async function getCurrentIp() {
@@ -87,6 +87,12 @@ function getReqHeader(client) {
   return reqHeader;
 }
 
+const deleteQUeue = (name) => {
+  const historyKey = HISTORY_KEY + name;
+  redis.srem(QUEUE_LIST, name);
+  redis.del(historyKey);
+};
+
 module.exports = {
   stringToHostAndPort,
   getCurrentIp,
@@ -99,4 +105,5 @@ module.exports = {
   publishToChannel,
   getReqHeader,
   getReplicasConfig,
+  deleteQUeue,
 };
