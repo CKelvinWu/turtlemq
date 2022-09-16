@@ -190,4 +190,13 @@ const setqueue = (req) => {
   return req.send({ success: true, message: 'set queue successifully' });
 };
 
+setInterval(() => {
+  if (group.role !== 'master') {
+    return;
+  }
+  const keys = Object.keys(group.queueChannels);
+  keys.forEach((name) => {
+    saveHistory(name, group.queueChannels[name].getQueueLength());
+  });
+}, 5000);
 module.exports = { produce, consume, setqueue };
