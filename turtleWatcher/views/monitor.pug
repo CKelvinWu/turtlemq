@@ -2,6 +2,30 @@ extends  layout.pug
 
 block content 
   // interactive chart
+  style(type='text/css' media='screen').
+    *{ font-family: "Lucida Grande";}
+    .progress-bar-holder{
+    width: 440px;
+    border: 1px solid #ccc;
+    padding: 0.2em;
+    margin: 1em 0.2em;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    }
+    .progress-bar{
+    height: 30px;
+    color: #fff;
+    font-weight: bold;
+    text-align: right;
+    background: #63A25C;
+    width: 0px;
+    padding: 0.8em;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    }
+
   #chart-container
   script(src='./public/js/monitor.js')
     

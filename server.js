@@ -29,7 +29,7 @@ subscriber.on('message', async (channel, message) => {
       // create connection to all replicas
       await group.createReplicaConnections();
 
-      const queueList = await redis.smembers(QUEUE_LIST);
+      const queueList = await redis.hkeys(QUEUE_LIST);
       const keys = Object.keys(group.queueChannels);
       const removeKeys = queueList.filter((queue) => !keys.includes(queue));
       for (const key of removeKeys) {

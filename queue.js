@@ -117,7 +117,7 @@ const saveHistory = async () => {
   const keys = Object.keys(group.queueChannels);
   keys.forEach(async (name) => {
     const queueSize = group.queueChannels[name].getQueueLength();
-    redis.sadd(QUEUE_LIST, name);
+    // redis.sadd(QUEUE_LIST, name);
     const historyKey = HISTORY_KEY + name;
     const latestHistory = await redis.lindex(historyKey, -1);
     // first history
@@ -150,6 +150,7 @@ const createQueue = (name, maxLength = 0) => {
   }
   if (!group.queueChannels[name].isSettedMaxLength && maxLength) {
     group.queueChannels[name].setMaxLength(maxLength);
+    redis.hset(QUEUE_LIST, name, maxLength);
   }
   return group.queueChannels[name];
 };

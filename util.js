@@ -89,7 +89,7 @@ function getReqHeader(client) {
 
 const deleteQUeue = (name) => {
   const historyKey = HISTORY_KEY + name;
-  redis.srem(QUEUE_LIST, name);
+  redis.hdel(QUEUE_LIST, name);
   redis.del(historyKey);
 };
 
