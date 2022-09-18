@@ -1,5 +1,58 @@
 /* eslint-disable prefer-arrow-callback */
 $(() => {
+  const produceForms = document.querySelectorAll('.needs-validation-produce');
+  // Prevent produce submission
+  Array.prototype.slice.call(produceForms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (form.checkValidity()) {
+          $.ajax({
+            url: '/api/1.0/queue/produce',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+              queue: $('#produce-queue').val(),
+              messages: [
+                $('#produce-messages').val(),
+              ],
+            }),
+          });
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+
+  const consumeForms = document.querySelectorAll('.needs-validation-consume');
+  // Prevent produce submission
+  Array.prototype.slice.call(consumeForms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        console.log('ok');
+        event.preventDefault();
+        event.stopPropagation();
+        if (form.checkValidity()) {
+          console.log($('#consume-queue').val());
+          $.ajax({
+            url: '/api/1.0/queue/consume',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+              queue: $('#consume-queue').val(),
+              quantity: $('#consume-quantity').val(),
+            }),
+          });
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
   /*
   * Flot Interactive Chart
   * -----------------------
@@ -8,7 +61,7 @@ $(() => {
   // be fetched from a server
   const updateInterval = 5000; // Fetch data ever x milliseconds fetching
   const HISTORY_TIME = 60 * 60 * 1000;
-  const HISTORY_INTERVAL = 5000;
+  const HISTORY_INTERVAL = 50000;
 
   function getData(queue) {
     const res = [];
@@ -26,7 +79,6 @@ $(() => {
       }
     }
     res.push([currentTime, queue.at(-1)?.queueSize]);
-    // console.log(res);
     // for (let i = 0; i < queue.length; i++) {
     //   res.push([queue[i]?.time, queue[i]?.queueSize]);
     // }
@@ -34,18 +86,29 @@ $(() => {
     return res;
   }
 
-  function createPlot(name, maxLength) {
-    let chartBody = $('<div></div>').addClass('card-body').attr('id', `queue-${name}`);
-    const queueTitleH3 = $('<h3></h3>').addClass('card-title').text(`${name}  maxLength: ${maxLength}`);
-    let progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
+  function createPlot(name) {
+    const chartBody = $('<div></div>').addClass('card-body').attr('id', `queue-${name}`);
+    const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center');
+    const queueTitleH3 = $('<h3></h3>').addClass('card-title').text(`queue ${name}`);
+    const queueCapacity = $('<h4></h4>').addClass(`${name}-queue-size`);
+    const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
     const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('id', `bar-${name}`);
     const interactiveDiv = $('<div></div>').addClass('interactive').attr('id', `interactive-${name}`).attr('data-queue', name)
       .css({ height: '300px', padding: '0px', position: 'relative' });
-    progressBarHolderDiv = progressBarHolderDiv.append(progressBarDiv);
-    chartBody = chartBody.append(queueTitleH3);
-    chartBody = chartBody.append(progressBarHolderDiv);
-    chartBody = chartBody.append(interactiveDiv);
+
+    queueTitleH3.appendTo(progressBarContainer);
+    progressBarHolderDiv.appendTo(progressBarContainer);
+    queueCapacity.appendTo(progressBarContainer);
+    progressBarDiv.appendTo(progressBarHolderDiv);
+    progressBarContainer.appendTo(chartBody);
+    interactiveDiv.appendTo(chartBody);
     $('#chart-container').append(chartBody);
+
+    $('<div class="tooltip-inner" id="line-chart-tooltip"></div>').css({
+      position: 'absolute',
+      display: 'none',
+      opacity: 0.8,
+    }).appendTo('body');
   }
 
   function deletePlot(name) {
@@ -68,24 +131,38 @@ $(() => {
           queueName.forEach((name) => {
             const isPlot = $(`#interactive-${name}`).length;
             const { maxLength } = result[name];
+            const { queueSize } = result[name].queueSize.at(-1);
             if (!isPlot) {
-              createPlot(name, maxLength);
+              createPlot(name);
+              $(`#interactive-${name}`).bind('plothover', function (event, pos, item) {
+                if (item) {
+                  const y = item.datapoint[1].toFixed(0);
+
+                  $('#line-chart-tooltip').html(`${y}`)
+                    .css({
+                      top: item.pageY + 5,
+                      left: item.pageX + 5,
+                    })
+                    .fadeIn(200);
+                } else {
+                  $('#line-chart-tooltip').hide();
+                }
+              });
             }
+            // update queue size
+            $(`.${name}-queue-size`).text(`${queueSize} / ${maxLength}`);
             const res = getData(result[name].queueSize);
-            // const start = res[0][0];
-            // const end = res.at(-1)[0];
-            // const step = Math.floor((end - start) / 15);
-            // const arrayLength = Math.floor(((end - start) / step)) + 1;
-            // const range = [...Array(arrayLength).keys()].map((x) => (x * step) + start);
             const interactivePlot = $.plot(
               `#interactive-${name}`,
               [
                 {
-                  label: name, data: getData(result[name].queueSize),
+                  label: name,
+                  data: res,
                 },
               ],
               {
                 grid: {
+                  hoverable: true,
                   borderColor: '#f3f3f3',
                   borderWidth: 1,
                   tickColor: '#f3f3f3',
@@ -99,33 +176,23 @@ $(() => {
                   },
                 },
                 yaxis: {
-                  // ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 100],
-                  min: 0,
-                  max: 100,
                   show: true,
                 },
                 xaxis: {
-                  // ticks: range,
                   mode: 'time',
-                  timeBase: 'seconds',
+                  timeBase: 'miliseconds',
                   timeformat: '%H:%M:%S',
-                  min: 0,
-                  max: 100,
                   show: true,
                 },
               },
             );
-            // interactivePlot.setData([getData()]);
+
+            // interactivePlot.setData([getData(result[name].queueSize)]);
             // Since the axes don't change, we don't need to call plot.setupGrid()
+            // interactivePlot.setupGrid();
             interactivePlot.draw();
             const percentage = (res.at(-1)[1] / maxLength) * 100;
-            $(`#bar-${name}`).text(`${Math.round(percentage, 2)} %`);
-
-            if (percentage > 10) {
-              $(`#bar-${name}`).animate({ width: `${15 + percentage * 4}px` }, 800);
-            } else {
-              $(`#bar-${name}`).css({ 'white-space': 'nowrap' }, 800).animate({ width: `${15}px` }, 800);
-            }
+            $(`#bar-${name}`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.9 * percentage + 10}%` }, 800).text(`${Math.round(percentage, 2)}%`);
           });
         });
     } catch (error) {

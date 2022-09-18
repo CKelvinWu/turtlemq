@@ -43,6 +43,8 @@ subscriber.on('message', async (channel, message) => {
     }
   }
 });
+deleteQUeue('test');
+deleteQUeue('competition');
 
 function createTurtleMQServer(requestHandler) {
   const server = net.createServer((connection) => {

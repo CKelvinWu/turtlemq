@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const { redis } = require('../utils/redis');
+const { tmqp } = require('../utils/tmqp');
 
 const { QUEUE_LIST, HISTORY_KEY } = process.env;
 const HISTORY_TIME = 60 * 60 * 1000;
@@ -44,4 +45,13 @@ const getQueue = async () => {
   return queueInfo;
 };
 
-module.exports = { getQueue };
+const produce = async (queue, messages) => {
+  await tmqp.produce(queue, messages);
+};
+
+const consume = async (queue, quantity) => {
+  const messages = await tmqp.consume(queue, quantity);
+  return messages;
+};
+
+module.exports = { getQueue, produce, consume };

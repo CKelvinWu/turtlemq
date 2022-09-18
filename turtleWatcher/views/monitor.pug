@@ -1,31 +1,68 @@
 extends  layout.pug 
+block head 
+  link(href='/public/plugins/bootstrap.min.css' rel='stylesheet')  
+  script(src='/public/plugins/dayjs.min.js')
+  script(src='/public/plugins/jquery.min.js')
+  script(src='/public/plugins/jquery.flot.js')
+  script(src='/public/plugins/bootstrap.bundle.min.js')
+  style(type='text/css' media='screen').
+  link(rel="stylesheet", href="/public/css/monitor.css")
 
 block content 
   // interactive chart
-  style(type='text/css' media='screen').
-    *{ font-family: "Lucida Grande";}
-    .progress-bar-holder{
-    width: 440px;
-    border: 1px solid #ccc;
-    padding: 0.2em;
-    margin: 1em 0.2em;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    }
-    .progress-bar{
-    height: 30px;
-    color: #fff;
-    font-weight: bold;
-    text-align: right;
-    background: #63A25C;
-    width: 0px;
-    padding: 0.8em;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    }
+
+  .container.mt-4
+    button.btn.btn-primary(type='button' data-bs-toggle='modal' data-bs-target='#produceModal')
+      | Produce Message
+    button.btn.btn-primary(type='button' data-bs-toggle='modal' data-bs-target='#consumeModal')
+      | Consume Message
+      
+  #produceModal.modal
+    .modal-dialog.modal-lg
+      .modal-content
+        .modal-header
+          h4.modal-title Produce Message
+          button.btn-close(type='button' data-bs-dismiss='modal')
+        .modal-body
+          form.row.g-3.needs-validation-produce(novalidate='')
+            div
+              label.form-label(for='validationCustomUsername') Queue
+              .input-group.has-validation
+                input.form-control#produce-queue(type='text' aria-describedby='inputGroupPrepend' required)
+                .invalid-feedback
+                  | Please input a queue name.
+            div
+              label.form-label(for='validationCustomUsername') Message
+              .input-group.has-validation
+                input.form-control#produce-messages(type='text' aria-describedby='inputGroupPrepend' required)
+                .invalid-feedback
+                  | Please type some messages.
+            .modal-footer
+              button.btn.btn-primary(type='submit') Produce
+
+  #consumeModal.modal
+    .modal-dialog.modal-lg
+      .modal-content
+        .modal-header
+          h4.modal-title Consume Message
+          button.btn-close(type='button' data-bs-dismiss='modal')
+        .modal-body
+          form.row.g-3.needs-validation-consume(novalidate='')
+            div
+              label.form-label(for='validationCustomUsername') Queue
+              .input-group.has-validation
+                input.form-control#consume-queue(type='text' aria-describedby='inputGroupPrepend' required)
+                .invalid-feedback
+                  | Please input a queue name.
+            div
+              label.form-label(for='validationCustomUsername') Quantity
+              .input-group.has-validation
+                input.form-control#consume-quantity(type='text' aria-describedby='inputGroupPrepend' required)
+                .invalid-feedback
+                  | Please fill in a number.
+            .modal-footer
+                button.btn.btn-primary(type='submit') Consume
 
   #chart-container
-  script(src='./public/js/monitor.js')
-    
+  script(src='/public/js/monitor.js')
+  
