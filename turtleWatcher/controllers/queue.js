@@ -14,7 +14,7 @@ const produce = asyncHandler(async (req, res) => {
 
 const consume = asyncHandler(async (req, res) => {
   const { queue, quantity } = req.body;
-  const messages = await Queue.consume(queue, quantity);
+  const messages = await Queue.consume(queue, +quantity);
   res.send({ success: true, messages });
 });
 

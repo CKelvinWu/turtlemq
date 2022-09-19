@@ -9,11 +9,17 @@ block head
 block content 
   // interactive chart
   .container.queue-container
-    .container.mt-4
-      button.btn.btn-primary.btn-block(type='button' data-bs-toggle='modal' data-bs-target='#produceModal')
-        | Produce +
-      button.btn.btn-primary.btn-block(type='button' data-bs-toggle='modal' data-bs-target='#consumeModal')
-        | Consume -
+    .container.mt-4.d-flex.justify-content-between.align-items-center
+      .left-info
+        button.btn.btn-primary.btn-block(type='button' data-bs-toggle='modal' data-bs-target='#produceModal')
+          | Produce +
+        button.btn.btn-primary.btn-block(type='button' data-bs-toggle='modal' data-bs-target='#consumeModal')
+          | Consume -
+      .right-info.d-flex
+        h4.master master: 
+          span.master-ip 
+        h4.replica replica: 
+          span.replica-ip 
         
     #produceModal.modal
       .modal-dialog.modal-lg

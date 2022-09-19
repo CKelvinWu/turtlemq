@@ -152,7 +152,8 @@ $(() => {
     try {
       $.ajax('/api/1.0/queue')
         .done((result) => {
-          const queueName = Object.keys(result);
+          const { queueInfo, master, replicas } = result;
+          const queueName = Object.keys(queueInfo);
           $('.interactive').each(function () {
             const queue = $(this).data('queue');
             const isExistQueue = queueName.includes(queue);
@@ -163,8 +164,8 @@ $(() => {
 
           queueName.forEach((name) => {
             const isPlot = $(`#interactive-${name}`).length;
-            const { maxLength } = result[name];
-            const { queueSize } = result[name].queueSize.at(-1);
+            const { maxLength } = queueInfo[name];
+            const { queueSize } = queueInfo[name].queueSize.at(-1);
             if (!isPlot) {
               createPlot(name);
               $(`#interactive-${name}`).bind('plothover', function (event, pos, item) {
@@ -184,7 +185,7 @@ $(() => {
             }
             // update queue size
             $(`.${name}-queue-size`).text(`${queueSize} / ${maxLength}`);
-            const res = getData(result[name].queueSize);
+            const res = getData(queueInfo[name].queueSize);
             const interactivePlot = $.plot(
               `#interactive-${name}`,
               [
@@ -227,6 +228,18 @@ $(() => {
             const percentage = (res.at(-1)[1] / maxLength) * 100;
             $(`#bar-${name}`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.9 * percentage + 10}%` }, 800).text(`${Math.round(percentage, 2)}%`);
           });
+          if (master) {
+            $('.master').show();
+            $('.master-ip').text(master);
+          } else {
+            $('.master').hide();
+          }
+          if (replicas?.length) {
+            $('.replica').show();
+            $('.replica-ip').text(replicas[0]);
+          } else {
+            $('.replica').hide();
+          }
         });
     } catch (error) {
       console.log(error);

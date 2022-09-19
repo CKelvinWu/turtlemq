@@ -2,7 +2,9 @@
 const { redis } = require('../utils/redis');
 const { tmqp } = require('../utils/tmqp');
 
-const { QUEUE_LIST, HISTORY_KEY } = process.env;
+const {
+  QUEUE_LIST, HISTORY_KEY, STATE_KEY, MASTER_KEY, REPLICA_KEY,
+} = process.env;
 const HISTORY_TIME = 60 * 60 * 1000;
 const HISTORY_INTERVAL = 5000;
 
@@ -42,7 +44,17 @@ const getQueue = async () => {
     queueInfo[queue].maxLength = maxLength;
     console.log(queueInfo[queue]);
   }
-  return queueInfo;
+  const result = {};
+  result.queueInfo = queueInfo;
+  const master = await redis.get(MASTER_KEY);
+  const replicas = await redis.hkeys(REPLICA_KEY);
+  if (master) {
+    result.master = master;
+  }
+  if (replicas.length) {
+    result.replicas = replicas;
+  }
+  return result;
 };
 
 const produce = async (queue, messages) => {
