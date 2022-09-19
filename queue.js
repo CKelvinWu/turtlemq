@@ -124,6 +124,9 @@ class Queue extends EventEmitter {
 
 const saveHistory = async () => {
   if (group.role !== 'master') {
+    setTimeout(() => {
+      saveHistory();
+    }, 5000);
     return;
   }
   const keys = Object.keys(group.queueChannels);
