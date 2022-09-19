@@ -54,4 +54,11 @@ const consume = async (queue, quantity) => {
   return messages;
 };
 
-module.exports = { getQueue, produce, consume };
+const deleteQueue = async (queue) => {
+  const messages = await tmqp.delete(queue);
+  return messages;
+};
+
+module.exports = {
+  getQueue, produce, consume, deleteQueue,
+};

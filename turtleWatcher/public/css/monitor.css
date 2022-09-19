@@ -1,14 +1,6 @@
-*{ 
-  font-family: "Lucida Grande";
-}
-
-*,*::after,*::before {
-  box-sizing: border-box;
-}
-
 .progress-bar-holder{
   width: 440px;
-  border: 1px solid #ccc;
+  background-color: #f5f5f5;
   padding: 0.2em;
   margin: 1em 0.2em;
   -webkit-border-radius: 4px;
@@ -21,7 +13,7 @@
   color: #fff;
   font-weight: bold;
   text-align: right;
-  background: #63A25C;
+  background: #588157;
   width: 10%;
   padding: 0.8em;
   white-space: nowrap;
@@ -33,15 +25,28 @@
 .tooltip-inner {
   max-width: 200px;
   padding: .25rem .5rem;
-  color: #fff;
+  color: #ccc;
   text-align: center;
   background-color: #000;
   border-radius: .25rem;
 } 
 
-.btn-primary {
-  margin-right: 20px
+.btn {
+  border-radius: 32px;
+  
+  border: none;
+  margin-right: 20px;
+  font-size: 24px;
+  letter-spacing: 2px;
+  background-color: #588157;
+  color: #FFF;  
 }
+
+.btn-primary:first-child:hover, :not(.btn-check)+.btn-primary:hover{
+  background-color: #7e9971;
+  color: #000;
+}
+
 
 .input-group-prepend {
   text-align: center;
@@ -50,4 +55,41 @@
 
 .input-group-text {
   text-align: center;
+}
+
+.modal-title {
+  font-size: 36px;
+}
+
+.form-control {
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+
+.card-body {
+  margin-top: 10px;
+  padding: 10px;
+  border: #588157 1px solid;
+  border-radius: 24px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.card-title {
+  margin-left: 30px;
+}
+
+.progress-bar-holder{
+  margin-left: 8px;
+}
+
+.queue-size {
+  margin-left: 8px;
+}
+
+.fa-trash-can {
+  line-height: 1.5;
+}
+
+.fa-trash-can:hover {
+  color: #ef5350;
 }

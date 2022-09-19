@@ -65,7 +65,7 @@ class Group {
   }
 
   setQueue(connection) {
-    const message = { id: this.id, method: 'setqueue', queueChannels: this.queueChannels };
+    const message = { id: this.id, method: 'setQueue', queueChannels: this.queueChannels };
     connection.send(message);
   }
 

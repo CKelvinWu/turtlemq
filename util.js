@@ -87,7 +87,7 @@ function getReqHeader(client) {
   return reqHeader;
 }
 
-const deleteQUeue = (name) => {
+const deleteQueues = (name) => {
   const historyKey = HISTORY_KEY + name;
   redis.hdel(QUEUE_LIST, name);
   redis.del(historyKey);
@@ -105,5 +105,5 @@ module.exports = {
   publishToChannel,
   getReqHeader,
   getReplicasConfig,
-  deleteQUeue,
+  deleteQueues,
 };

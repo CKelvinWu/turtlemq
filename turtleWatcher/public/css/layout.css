@@ -1,0 +1,66 @@
+*{ 
+  /* font-family: "Lucida Grande"; */
+  font-family: 'FEDORA', sans-serif;
+                                                
+}
+
+*,*::after,*::before {
+  box-sizing: border-box;
+}
+
+body {  
+  letter-spacing: 1px;
+  font-size: 24px;
+  background-color: #e5e5e5;
+}
+
+a {
+  color: #588157;
+  text-decoration: none;
+}
+
+a:hover {
+  cursor: pointer;
+  color: #7e9971;
+}
+
+header {
+  background: #c1d1c9;
+  padding: 20px 40px;
+  
+}
+
+.logo {                                                
+  width: 60px;
+}
+
+.title {
+  font-family: 'Want Coffee', sans-serif;  
+  color:#3a5a40;
+  padding: 10px 0;
+  margin: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.title-mq {
+  font-family: 'Want Coffee', sans-serif;
+  color:#758173;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+nav {
+  cursor: pointer;
+  color: #797979;
+  font-size: 30px;
+  padding: 10px 16px;
+}

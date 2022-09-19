@@ -18,8 +18,15 @@ const consume = asyncHandler(async (req, res) => {
   res.send({ success: true, messages });
 });
 
+const deleteQueue = asyncHandler(async (req, res) => {
+  const { queue } = req.body;
+  const messages = await Queue.deleteQueue(queue);
+  res.send({ success: true, messages });
+});
+
 module.exports = {
   queueInfo,
   produce,
   consume,
+  deleteQueue,
 };

@@ -2,6 +2,7 @@ require('dotenv');
 const EventEmitter = require('node:events');
 const { redis } = require('./redis');
 const group = require('./group');
+const { deleteQueues } = require('./util');
 
 const {
   DEFAULT_QUEUE_LENGTH, HISTORY_KEY, HISTORY_INTERVAL, QUEUE_LIST,
@@ -108,6 +109,17 @@ class Queue extends EventEmitter {
     console.log(`Consume queue: ${JSON.stringify(messages)}`);
     return messages;
   }
+
+  delete(req) {
+    const name = req.body.queue;
+    delete group.queueChannels[name];
+    req.send({
+      id: req.body.id,
+      method: 'delete',
+      queue: this.name,
+      success: true,
+    });
+  }
 }
 
 const saveHistory = async () => {
@@ -188,7 +200,18 @@ const consume = (req) => {
   }
 };
 
-const setqueue = (req) => {
+const deleteQueue = (req) => {
+  const { queue } = req.body;
+  console.log(queue);
+  try {
+    deleteQueues(queue);
+    group.queueChannels[queue].delete(req);
+  } catch (error) {
+    req.send({ success: false, message: 'delete error' });
+  }
+};
+
+const setQueue = (req) => {
   const { queueChannels } = req.body;
   Object.keys(queueChannels).forEach((key) => {
     const {
@@ -204,4 +227,6 @@ const setqueue = (req) => {
 
 saveHistory();
 
-module.exports = { produce, consume, setqueue };
+module.exports = {
+  produce, consume, setQueue, deleteQueue,
+};

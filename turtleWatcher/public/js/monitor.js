@@ -53,6 +53,19 @@ $(() => {
         form.classList.add('was-validated');
       }, false);
     });
+
+  function deleteQueue(queue) {
+    $.ajax({
+      url: '/api/1.0/queue/delete',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify({
+        queue,
+      }),
+    });
+  }
   /*
   * Flot Interactive Chart
   * -----------------------
@@ -90,8 +103,9 @@ $(() => {
     const chartBody = $('<div></div>').addClass('card-body').attr('id', `queue-${name}`);
     const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center');
     const queueTitleH3 = $('<h3></h3>').addClass('card-title').text(`queue ${name}`);
-    const queueCapacity = $('<h4></h4>').addClass(`${name}-queue-size`);
+    const queueCapacity = $('<spam></span>').addClass(`${name}-queue-size queue-size`);
     const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
+    const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name}`);
     const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('id', `bar-${name}`);
     const interactiveDiv = $('<div></div>').addClass('interactive').attr('id', `interactive-${name}`).attr('data-queue', name)
       .css({ height: '300px', padding: '0px', position: 'relative' });
@@ -99,6 +113,7 @@ $(() => {
     queueTitleH3.appendTo(progressBarContainer);
     progressBarHolderDiv.appendTo(progressBarContainer);
     queueCapacity.appendTo(progressBarContainer);
+    trashIcon.appendTo(progressBarContainer);
     progressBarDiv.appendTo(progressBarHolderDiv);
     progressBarContainer.appendTo(chartBody);
     interactiveDiv.appendTo(chartBody);
@@ -109,6 +124,38 @@ $(() => {
       display: 'none',
       opacity: 0.8,
     }).appendTo('body');
+
+    $(`.delete-${name}`).on('click', () => {
+      const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+          confirmButton: 'btn btn-success',
+          cancelButton: 'btn btn-danger',
+        },
+        buttonsStyling: false,
+      });
+
+      swalWithBootstrapButtons.fire({
+        title: `Are you sure to delete '${name}'?`,
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!',
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          deleteQueue(name);
+          swalWithBootstrapButtons.fire(
+            'Deleted!',
+            `'${name}' has been deleted.`,
+            'success',
+          );
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        );
+      });
+    });
   }
 
   function deletePlot(name) {
@@ -163,12 +210,12 @@ $(() => {
               {
                 grid: {
                   hoverable: true,
-                  borderColor: '#f3f3f3',
+                  borderColor: '#f5f5f5',
                   borderWidth: 1,
-                  tickColor: '#f3f3f3',
+                  tickColor: '#f5f5f5',
                 },
                 series: {
-                  color: '#3c8dbc',
+                  color: '#588157',
                   lines: {
                     lineWidth: 2,
                     show: true,

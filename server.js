@@ -3,7 +3,7 @@ const net = require('net');
 const queueRoutes = require('./queue');
 const group = require('./group');
 const { redis } = require('./redis');
-const { getCurrentIp, getReqHeader, deleteQUeue } = require('./util');
+const { getCurrentIp, getReqHeader, deleteQueues } = require('./util');
 
 const { PORT, CHANNEL, QUEUE_LIST } = process.env;
 let ip;
@@ -33,7 +33,7 @@ subscriber.on('message', async (channel, message) => {
       const keys = Object.keys(group.queueChannels);
       const removeKeys = queueList.filter((queue) => !keys.includes(queue));
       for (const key of removeKeys) {
-        deleteQUeue(key);
+        deleteQueues(key);
       }
     }
   } else if (method === 'join') {
@@ -43,8 +43,8 @@ subscriber.on('message', async (channel, message) => {
     }
   }
 });
-deleteQUeue('test');
-deleteQUeue('competition');
+// deleteQueues('resr');
+// deleteQueues('aaaa');
 
 function createTurtleMQServer(requestHandler) {
   const server = net.createServer((connection) => {
@@ -92,7 +92,7 @@ function createTurtleMQServer(requestHandler) {
 
 const webServer = createTurtleMQServer(async (req) => {
   console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
-  const method = req.body.method.toLowerCase();
+  const { method } = req.body;
   req.role = group.role;
   // response self role only
   if (method === 'heartbeat') {
