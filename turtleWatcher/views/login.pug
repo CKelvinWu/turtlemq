@@ -1,0 +1,13 @@
+extends  layout.pug 
+block head 
+  link(rel="stylesheet", href="/public/css/login.css")
+
+block content 
+  .login-page
+    .form
+      form.login-form
+        input.user(type='text' placeholder='username')
+        input.password(type='password' placeholder='password')
+        button.btn#login login
+  
+  script(src='/public/js/login.js')

@@ -12,7 +12,7 @@ body {
   letter-spacing: 1px;
   font-size: 24px;
   background-color: #e5e5e5;
-  min-height: 1vh;
+  min-height: 100vh;
 }
 
 a {
@@ -65,6 +65,32 @@ nav {
   color: #797979;
   font-size: 30px;
   padding: 10px 16px;
+}
+
+.btn {
+  border-radius: 32px;
+  
+  border: none;
+  margin-right: 20px;
+  font-size: 24px;
+  letter-spacing: 2px;
+  background-color: #588157;
+  color: #FFF;  
+}
+
+.btn-primary:first-child:hover, :not(.btn-check)+.btn-primary:hover{
+  background-color: #7e9971;
+  color: #000;
+}
+
+
+.input-group-prepend {
+  text-align: center;
+  width: 90px;
+}
+
+.input-group-text {
+  text-align: center;
 }
 
 footer {
