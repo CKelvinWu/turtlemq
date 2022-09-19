@@ -55,9 +55,9 @@ block content
               div
                 label.form-label(for='validationCustomUsername') Quantity
                 .input-group.has-validation
-                  input.form-control#consume-quantity(type='text' aria-describedby='inputGroupPrepend' required)
+                  input.form-control#consume-quantity(type='number' min='1' aria-describedby='inputGroupPrepend' required)
                   .invalid-feedback
-                    | Please fill in a number.
+                    | Please fill in a positive number.
               .modal-footer
                   button.btn.btn-primary(type='submit') Consume
 

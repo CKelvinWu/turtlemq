@@ -58,26 +58,30 @@ function createTurtleMQServer(requestHandler) {
 
   function connectionHandler(socket) {
     socket.on('readable', () => {
-      const reqHeader = getReqHeader(socket);
+      // catch none tmqp request
+      try {
+        const reqHeader = getReqHeader(socket);
 
-      if (!reqHeader) return;
+        if (!reqHeader) return;
+        const body = JSON.parse(reqHeader);
+        const request = {
+          body,
+          socket,
+          send(data) {
+            console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
+            const message = `${JSON.stringify(data)}\r\n\r\n`;
+            socket.write(message);
+          },
+          end() {
+            socket.end();
+          },
+        };
 
-      const body = JSON.parse(reqHeader);
-      const request = {
-        body,
-        socket,
-        send(data) {
-          console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
-          const message = `${JSON.stringify(data)}\r\n\r\n`;
-          socket.write(message);
-        },
-        end() {
-          socket.end();
-        },
-      };
-
-      // Send the request to the handler
-      requestHandler(request);
+        // Send the request to the handler
+        requestHandler(request);
+      } catch (error) {
+        console.log(error);
+      }
     });
     socket.on('error', () => {
       console.log('socket error ');

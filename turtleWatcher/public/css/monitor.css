@@ -93,3 +93,15 @@
 .fa-trash-can:hover {
   color: #ef5350;
 }
+
+.swal2-popup {
+
+}
+
+.swal2-styled.swal2-confirm {
+  width: 90px;
+  background-color: #588157;
+  line-height: 1;
+  letter-spacing: 2px;
+  border-radius: 32px;
+}

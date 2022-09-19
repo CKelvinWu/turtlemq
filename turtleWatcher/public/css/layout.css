@@ -12,6 +12,7 @@ body {
   letter-spacing: 1px;
   font-size: 24px;
   background-color: #e5e5e5;
+  min-height: 1vh;
 }
 
 a {
@@ -64,4 +65,14 @@ nav {
   color: #797979;
   font-size: 30px;
   padding: 10px 16px;
+}
+
+footer {
+  margin-top: 24px;
+  background: #344e41;
+  padding: 20px 40px;  
+}
+
+.copyright {
+  color: #bdc5c1;
 }

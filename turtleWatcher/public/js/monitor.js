@@ -32,11 +32,9 @@ $(() => {
   Array.prototype.slice.call(consumeForms)
     .forEach(function (form) {
       form.addEventListener('submit', function (event) {
-        console.log('ok');
         event.preventDefault();
         event.stopPropagation();
         if (form.checkValidity()) {
-          console.log($('#consume-queue').val());
           $.ajax({
             url: '/api/1.0/queue/consume',
             method: 'POST',
@@ -47,6 +45,8 @@ $(() => {
               queue: $('#consume-queue').val(),
               quantity: $('#consume-quantity').val(),
             }),
+          }).done((result) => {
+            Swal.fire(`Consume messages: ${result.messages}`);
           });
         }
 
