@@ -5,8 +5,10 @@ const group = require('./group');
 const { deleteQueues } = require('./util');
 
 const {
-  DEFAULT_QUEUE_LENGTH, HISTORY_KEY, HISTORY_INTERVAL, QUEUE_LIST,
+  DEFAULT_QUEUE_LENGTH, HISTORY_KEY, QUEUE_LIST,
 } = process.env;
+const HISTORY_INTERVAL = +process.env.HISTORY_INTERVAL;
+const MIN_KEEPED_HISTROY_TIME = +process.env.MIN_KEEPED_HISTROY_TIME;
 
 class Queue extends EventEmitter {
   constructor(name) {
@@ -131,27 +133,38 @@ const saveHistory = async () => {
   }
   const keys = Object.keys(group.queueChannels);
   keys.forEach(async (name) => {
+    const currentTime = Date.now();
     const queueSize = group.queueChannels[name].getQueueLength();
-    // redis.sadd(QUEUE_LIST, name);
     const historyKey = HISTORY_KEY + name;
     const latestHistory = await redis.lindex(historyKey, -1);
+
     // first history
     if (!latestHistory) {
-      const history = { time: Date.now(), queueSize };
-      await redis.rpush(historyKey, JSON.stringify(history));
+      await redis.rpush(historyKey, JSON.stringify({
+        time: currentTime - HISTORY_INTERVAL,
+        queueSize: 0,
+      }));
+      await redis.rpush(historyKey, JSON.stringify({ time: currentTime, queueSize }));
       return;
     }
 
     // history exceed interval
-    const { time } = JSON.parse(latestHistory);
-    if (Date.now() - time > HISTORY_INTERVAL) {
-      const history = { time: Date.now(), queueSize };
-      await redis.rpush(historyKey, JSON.stringify(history));
+    const { time, queueSize: lastQueueSize } = JSON.parse(latestHistory);
+    if (lastQueueSize === queueSize) {
       return;
     }
-    // update history in interval
-    const history = { time, queueSize };
-    await redis.lset(historyKey, -1, JSON.stringify(history));
+    // last interval has insert value
+    if (currentTime - HISTORY_INTERVAL * 2 > time) {
+      const history = { time: currentTime - HISTORY_INTERVAL, queueSize: lastQueueSize };
+      await redis.rpush(historyKey, JSON.stringify(history));
+    }
+    await redis.rpush(historyKey, JSON.stringify({ time: currentTime, queueSize }));
+
+    // remove old history
+    const historyLength = await redis.llen(historyKey);
+    if (historyLength > MIN_KEEPED_HISTROY_TIME / HISTORY_INTERVAL) {
+      await redis.lrem(historyKey, historyLength - MIN_KEEPED_HISTROY_TIME / HISTORY_INTERVAL);
+    }
   });
   setTimeout(() => {
     saveHistory();

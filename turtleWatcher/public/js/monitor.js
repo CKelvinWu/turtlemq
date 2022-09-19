@@ -73,28 +73,14 @@ $(() => {
   // We use an inline data source in the example, usually data would
   // be fetched from a server
   const updateInterval = 5000; // Fetch data ever x milliseconds fetching
-  const HISTORY_TIME = 60 * 60 * 1000;
-  const HISTORY_INTERVAL = 50000;
 
   function getData(queue) {
     const res = [];
     const currentTime = Date.now();
-    const startTime = currentTime - HISTORY_TIME;
-    let index = 0;
-    for (let time = startTime; time < currentTime; time += HISTORY_INTERVAL) {
-      if (queue[index + 1]?.time < time) {
-        res.push([time, queue[index]?.queueSize]);
-        while (queue[index + 1]?.time < time) {
-          index++;
-        }
-      } else {
-        res.push([time, queue[index]?.queueSize]);
-      }
+    for (let i = 0; i < queue.length; i++) {
+      res.push([queue[i]?.time, queue[i]?.queueSize]);
     }
     res.push([currentTime, queue.at(-1)?.queueSize]);
-    // for (let i = 0; i < queue.length; i++) {
-    //   res.push([queue[i]?.time, queue[i]?.queueSize]);
-    // }
 
     return res;
   }
@@ -128,8 +114,8 @@ $(() => {
     $(`.delete-${name}`).on('click', () => {
       const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
-          confirmButton: 'btn btn-success',
-          cancelButton: 'btn btn-danger',
+          confirmButton: 'btn btn-danger',
+          cancelButton: 'btn btn-success',
         },
         buttonsStyling: false,
       });
