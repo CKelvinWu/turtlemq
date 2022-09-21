@@ -1,5 +1,24 @@
 /* eslint-disable prefer-arrow-callback */
 $(() => {
+  $('#masterdrop').hide();
+
+  $('#masterclick').mouseover(function () {
+    $('#masterdrop').slideDown('slow');
+  });
+
+  $('#masterwrapper').mouseleave(function () {
+    $('#masterdrop').slideUp('slow');
+  });
+  $('#replicadrop').hide();
+
+  $('#replicaclick').mouseover(function () {
+    $('#replicadrop').slideDown('slow');
+  });
+
+  $('#replicawrapper').mouseleave(function () {
+    $('#replicadrop').slideUp('slow');
+  });
+
   const produceForms = document.querySelectorAll('.needs-validation-produce');
   // Prevent produce submission
   Array.prototype.slice.call(produceForms)

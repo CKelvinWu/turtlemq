@@ -1,3 +1,10 @@
+:root {
+  --dark-green: #3a5a40;
+  --background-primary: #e5e5e5;
+  --hover-green: #7e9971;
+  --green: #588157;
+}
+
 *{ 
   /* font-family: "Lucida Grande"; */
   font-family: 'FEDORA', sans-serif;
@@ -11,22 +18,22 @@
 body {  
   letter-spacing: 1px;
   font-size: 24px;
-  background-color: #e5e5e5;
+  background-color: var(--background-primary);
   min-height: 100vh;
 }
 
 a {
-  color: #588157;
+  color: var(--dark-green);
   text-decoration: none;
 }
 
 a:hover {
   cursor: pointer;
-  color: #7e9971;
+  color: white;
 }
 
 header {
-  background: #c1d1c9;
+  background: var(--hover-green);
   padding: 20px 40px;
   
 }
@@ -38,7 +45,7 @@ header {
 
 .title {
   font-family: 'Want Coffee', sans-serif;  
-  color:#3a5a40;
+  color: var(--dark-green);
   padding: 10px 0;
   margin: 0;
   -webkit-touch-callout: none;
@@ -79,7 +86,7 @@ nav {
 }
 
 .btn-primary:first-child:hover, :not(.btn-check)+.btn-primary:hover{
-  background-color: #7e9971;
+  background-color: var(--hover-green);
   color: #000;
 }
 
