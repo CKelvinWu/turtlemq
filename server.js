@@ -43,8 +43,6 @@ subscriber.on('message', async (channel, message) => {
     }
   }
 });
-// deleteQueues('resr');
-// deleteQueues('aaaa');
 
 function createTurtleMQServer(requestHandler) {
   const server = net.createServer((connection) => {

@@ -16,16 +16,15 @@ block content
         button.btn.btn-primary.btn-block(type='button' data-bs-toggle='modal' data-bs-target='#consumeModal')
           | Consume -
       .right-info.d-flex
-        .dropdown
+        .dropdown.dropdown-master 
           button.dropbtn Master
-          .dropdown-content
-            a(href='#') localhost:3000
-        .dropdown
+          .dropdown-content 
+            .dropdown-item.d-flex.align-items-center
+              .status
+              .master-ip 
+        .dropdown.dropdown-replica 
           button.dropbtn Replica
-          .dropdown-content
-            a(href='#') 18.121.234.561:3001
-            a(href='#') localhost:3002
-            a(href='#') localhost:3003
+          .dropdown-content#dropdown-content-replica
         
     #produceModal.modal
       .modal-dialog.modal-lg

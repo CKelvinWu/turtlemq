@@ -162,7 +162,7 @@ const saveHistory = async () => {
 
     // remove old history
     const historyLength = await redis.llen(historyKey);
-    if (historyLength > MIN_KEEPED_HISTROY_TIME / HISTORY_INTERVAL) {
+    if (historyLength > (2 * MIN_KEEPED_HISTROY_TIME) / HISTORY_INTERVAL) {
       await redis.lrem(historyKey, historyLength - MIN_KEEPED_HISTROY_TIME / HISTORY_INTERVAL);
     }
   });
@@ -190,9 +190,6 @@ const produce = (req) => {
     const maxLength = body.maxLength || +DEFAULT_QUEUE_LENGTH;
     const queueObj = createQueue(name, maxLength);
     queueObj.produce(messages, req);
-    if (req.role === 'master') {
-      saveHistory(name, queueObj.getQueueLength());
-    }
     return;
   } catch (error) {
     console.log(error);
@@ -206,9 +203,6 @@ const consume = (req) => {
   try {
     const queueObj = createQueue(name);
     queueObj.consume(req);
-    if (req.role === 'master') {
-      saveHistory(name, queueObj.getQueueLength());
-    }
     return;
   } catch (error) {
     console.log(error);

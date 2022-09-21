@@ -26,12 +26,20 @@ const getQueue = async () => {
       data.push({ time: time - (+HISTORY_TIME), queueSize: latestResult?.queueSize });
       data.push({ time, queueSize: latestResult?.queueSize });
     } else {
-      data.push({ time: time - (+HISTORY_TIME), queueSize: 0 });
+      // data.push({ time: time - (+HISTORY_TIME), queueSize: 0 });
       // if there is any history in past an hour
+      let isPushFirstData = false;
+      let previousHistory = JSON.parse(results[0]);
       for (let i = 0; i < results.length; i++) {
         const history = JSON.parse(results[i]);
         if (time - history.time < +HISTORY_TIME) {
+          if (!isPushFirstData) {
+            isPushFirstData = true;
+            data.push({ time: time - (+HISTORY_TIME), queueSize: previousHistory.queueSize });
+            data.push({ time: history.time, queueSize: previousHistory.queueSize });
+          }
           data.push(history);
+          previousHistory = history;
         }
       }
     }

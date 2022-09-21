@@ -1,24 +1,5 @@
 /* eslint-disable prefer-arrow-callback */
 $(() => {
-  $('#masterdrop').hide();
-
-  $('#masterclick').mouseover(function () {
-    $('#masterdrop').slideDown('slow');
-  });
-
-  $('#masterwrapper').mouseleave(function () {
-    $('#masterdrop').slideUp('slow');
-  });
-  $('#replicadrop').hide();
-
-  $('#replicaclick').mouseover(function () {
-    $('#replicadrop').slideDown('slow');
-  });
-
-  $('#replicawrapper').mouseleave(function () {
-    $('#replicadrop').slideUp('slow');
-  });
-
   const produceForms = document.querySelectorAll('.needs-validation-produce');
   // Prevent produce submission
   Array.prototype.slice.call(produceForms)
@@ -110,7 +91,7 @@ $(() => {
     const queueTitleH3 = $('<h3></h3>').addClass('card-title').text(`queue ${name}`);
     const queueCapacity = $('<spam></span>').addClass(`${name}-queue-size queue-size`);
     const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
-    const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name}`);
+    const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name} delete-btn`);
     const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('id', `bar-${name}`);
     const interactiveDiv = $('<div></div>').addClass('interactive').attr('id', `interactive-${name}`).attr('data-queue', name)
       .css({ height: '300px', padding: '0px', position: 'relative' });
@@ -247,17 +228,30 @@ $(() => {
             const percentage = (res.at(-1)[1] / maxLength) * 100;
             $(`#bar-${name}`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.9 * percentage + 10}%` }, 800).text(`${Math.round(percentage, 2)}%`);
           });
-          if (master) {
-            $('.master').show();
+
+          // render master and replicas
+          const masterip = $('.master-ip').text();
+          const replicaList = $('.replica-ip');
+          const replicaips = [];
+          replicaList.each(function () {
+            // remove not exist replica
+            if (!replicas?.includes($(this).text())) {
+              $(this).parent().remove();
+            }
+            replicaips.push($(this).text());
+          });
+
+          if (master !== masterip) {
             $('.master-ip').text(master);
-          } else {
-            $('.master').hide();
           }
-          if (replicas?.length) {
-            $('.replica').show();
-            $('.replica-ip').text(replicas[0]);
-          } else {
-            $('.replica').hide();
+          // create new replica
+          if (replicas) {
+            for (const replica of replicas) {
+              if (!replicaips.includes(replica)) {
+                const replicadiv = `<div class="dropdown-item d-flex align-items-center"><div class="status"></div><div class="replica-ip">${replica}</div></div>`;
+                $(replicadiv).appendTo($('#dropdown-content-replica'));
+              }
+            }
           }
         });
     } catch (error) {
