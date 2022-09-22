@@ -26,4 +26,22 @@ $(() => {
       },
     });
   });
+  $('.user').on({
+    keydown(e) {
+      if (e.which === 32) return false;
+      return true;
+    },
+    change() {
+      this.value = this.value.replace(/\s/g, '');
+    },
+  });
+  $('.password').on({
+    keydown(e) {
+      if (e.which === 32) return false;
+      return true;
+    },
+    change() {
+      this.value = this.value.replace(/\s/g, '');
+    },
+  });
 });

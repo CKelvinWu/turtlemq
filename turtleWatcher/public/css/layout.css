@@ -77,7 +77,13 @@ nav {
   cursor: pointer;
   color: #797979;
   font-size: 30px;
-  padding: 10px 16px;
+  line-height: 1;
+  padding: 5px 16px;
+}
+
+nav:hover {
+  color: white;
+  text-decoration: underline;
 }
 
 .btn {
@@ -86,7 +92,7 @@ nav {
   margin-right: 20px;
   font-size: 24px;
   letter-spacing: 2px;
-  background-color: #588157;
+  background-color: var(--dark-green);
   color: #FFF;  
 }
 
@@ -113,4 +119,59 @@ footer {
 
 .copyright {
   color: #bdc5c1;
+}
+
+.dropdown-nav {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-nav-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: -25%;
+  background-color: var(--background-primary);
+  min-width: 120px;
+  font-size: 24px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 16px;
+}
+
+.dropdown-nav:hover .dropdown-nav-content {
+  display: flex;
+}
+
+
+.dropdown-nav-item {
+  width: 200px;
+  color: black;
+  padding: 6px 20px;
+  text-decoration: none;
+  display: block;
+} 
+
+.dropdown-nav-item:hover {
+  cursor: pointer;
+  background-color: var(--green);
+  border-radius: 16px;
+} 
+
+.dropdown-nav:hover .dropdown-nav-content {
+  display: block;
+}
+
+.dropdown-nav:hover .dropbtn {
+  background-color: var(--hover-green);
+  color: #ffffff;
+}
+
+.nav-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.page {
+  margin-left: 8px;
 }

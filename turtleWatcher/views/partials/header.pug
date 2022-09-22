@@ -7,8 +7,21 @@ header
     .header-right.d-flex.align-items-center
       nav
         a.about(href="/") About 
-      nav
+      nav.dropdown-nav 
         a.document(href="/") Document
+        .dropdown-nav-content(href="/")
+          a.dropdown-nav-item.d-flex.align-items-center(href="https://www.npmjs.com/package/tmqp-client")
+            img.nav-icon(src="/public/images/npm-icon.svg", alt="", srcset="")
+            .page tmqp-client
+          a.dropdown-nav-item.d-flex.align-items-center(href="https://github.com/kai5363/tmqp-client/")
+            img.nav-icon(src="/public/images/github-logo.png", alt="", srcset="")
+            .page tmqp-client
+          a.dropdown-nav-item.d-flex.align-items-center(href="https://github.com/kai5363/turtlemq/")
+            img.nav-icon(src="/public/images/github-logo.png", alt="", srcset="")
+            .page turtlemq
+          a.dropdown-nav-item.d-flex.align-items-center(href="https://github.com/kai5363/turtlekeeper/")
+            img.nav-icon(src="/public/images/github-logo.png", alt="", srcset="")
+            .page turtlekeeper
       nav
         if isLogout
           a.logout(href="/login") Login

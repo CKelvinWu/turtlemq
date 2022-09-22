@@ -1,6 +1,6 @@
 .dropbtn {
   background-color: #e5e5e5;
-  width: 200px;
+  width: 100px;
   color: var(--green);
   padding: 4px 0;
   border: none;
@@ -17,7 +17,7 @@
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0;
   background-color: var(--background-primary);
   min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -47,7 +47,7 @@
 
 .dropdown-item:hover {
   cursor: pointer;
-  background-color: var(--hover-green);
+  background-color: #d3ddce;
   border-radius: 16px;
 } 
 
