@@ -113,8 +113,8 @@ class Queue extends EventEmitter {
   }
 
   delete(req) {
-    const name = req.body.queue;
-    delete group.queueChannels[name];
+    // const name = req.body.queue;
+    delete group.queueChannels[this.name];
     req.send({
       id: req.body.id,
       method: 'delete',
@@ -210,13 +210,14 @@ const consume = (req) => {
   }
 };
 
-const deleteQueue = (req) => {
+const deleteQueue = async (req) => {
   const { queue } = req.body;
   console.log(queue);
   try {
-    deleteQueues(queue);
-    group.queueChannels[queue].delete(req);
+    await deleteQueues(queue);
+    group.queueChannels[queue]?.delete(req);
   } catch (error) {
+    console.log(error);
     req.send({ success: false, message: 'delete error' });
   }
 };

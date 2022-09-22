@@ -11,7 +11,7 @@
   background: #f5f5f5;
   max-width: 360px;
   margin: auto;
-  padding: 45px;
+  padding: 30px;
   text-align: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
@@ -31,16 +31,17 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: #FFFFFF 10px solid;
+  border: var(--green) 10px solid;
 }
 
 .form input {
   outline: 0;
-  background: #f2f2f2;
+  background: #e1e1e1;
   width: 100%;
   border: 0;
+  border-radius: 32px;
   margin: 0 0 15px;
-  padding: 15px;
+  padding: 10px 24px;
   box-sizing: border-box;
   font-size: 24px;
   letter-spacing: 2px;
@@ -49,7 +50,7 @@
   outline: 0;
   width: 100%;
   border: 0;
-  padding: 15px;
+  padding: 10 24px;
   color: #FFFFFF;
   font-size: 24px;
   -webkit-transition: all 0.3 ease;

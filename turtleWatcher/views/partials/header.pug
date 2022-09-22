@@ -10,4 +10,7 @@ header
       nav
         a.document(href="/") Document
       nav
-        a.logout(href="/api/1.0/user/logout") Logout
+        if isLogout
+          a.logout(href="/login") Login
+        else
+          a.logout(href="/api/1.0/user/logout") Logout

@@ -3,10 +3,18 @@ const { redis } = require('../utils/redis');
 const { tmqp } = require('../utils/tmqp');
 
 const {
-  QUEUE_LIST, HISTORY_KEY, STATE_KEY, MASTER_KEY, REPLICA_KEY,
+  QUEUE_LIST, HISTORY_KEY, MASTER_KEY, REPLICA_KEY,
 } = process.env;
 const HISTORY_TIME = 60 * 60 * 1000;
 const HISTORY_INTERVAL = 5000;
+
+const getVotes = async (ip) => {
+  const timeStamps = await redis.hvals(ip);
+  const votes = timeStamps.filter(
+    (timeStamp) => timeStamp > Date.now() - 9000 - HISTORY_INTERVAL,
+  );
+  return votes;
+};
 
 const getQueue = async () => {
   const queueList = await redis.hkeys(QUEUE_LIST);
@@ -57,10 +65,19 @@ const getQueue = async () => {
   const master = await redis.get(MASTER_KEY);
   const replicas = await redis.hkeys(REPLICA_KEY);
   if (master) {
-    result.master = master;
+    const masterVotes = await getVotes(master);
+    const masterState = masterVotes.length ? 'unhealthy' : 'active';
+    result.master = { ip: master, state: masterState, votes: masterVotes.length };
   }
   if (replicas.length) {
-    result.replicas = replicas;
+    result.replicas = [];
+    for (let i = 0; i < replicas.length; i++) {
+      const replica = replicas[i];
+      const replicaVotes = await getVotes(replica);
+      const replicaState = replicaVotes.length ? 'unhealthy' : 'active';
+      console.log({ ip: replica, state: replicaState, votes: replicaVotes.length });
+      result.replicas.push({ ip: replica, state: replicaState, votes: replicaVotes.length });
+    }
   }
   return result;
 };

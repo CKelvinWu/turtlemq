@@ -1,71 +1,5 @@
 /* eslint-disable prefer-arrow-callback */
 $(() => {
-  const produceForms = document.querySelectorAll('.needs-validation-produce');
-  // Prevent produce submission
-  Array.prototype.slice.call(produceForms)
-    .forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (form.checkValidity()) {
-          $.ajax({
-            url: '/api/1.0/queue/produce',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: JSON.stringify({
-              queue: $('#produce-queue').val(),
-              messages: [
-                $('#produce-messages').val(),
-              ],
-            }),
-          });
-        }
-
-        form.classList.add('was-validated');
-      }, false);
-    });
-
-  const consumeForms = document.querySelectorAll('.needs-validation-consume');
-  // Prevent produce submission
-  Array.prototype.slice.call(consumeForms)
-    .forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (form.checkValidity()) {
-          $.ajax({
-            url: '/api/1.0/queue/consume',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: JSON.stringify({
-              queue: $('#consume-queue').val(),
-              quantity: $('#consume-quantity').val(),
-            }),
-          }).done((result) => {
-            Swal.fire(`Consume messages: ${result.messages}`);
-          });
-        }
-
-        form.classList.add('was-validated');
-      }, false);
-    });
-
-  function deleteQueue(queue) {
-    $.ajax({
-      url: '/api/1.0/queue/delete',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: JSON.stringify({
-        queue,
-      }),
-    });
-  }
   /*
   * Flot Interactive Chart
   * -----------------------
@@ -145,7 +79,7 @@ $(() => {
   }
 
   function deletePlot(name) {
-    $(`#queue-${name}`).remove();
+    $(`#queue-${name}`).slideUp(500, function () { $(`#queue-${name}`).remove(); });
   }
 
   function update() {
@@ -232,24 +166,37 @@ $(() => {
           // render master and replicas
           const masterip = $('.master-ip').text();
           const replicaList = $('.replica-ip');
-          const replicaips = [];
+          const replicaipList = [];
+          const replicaips = replicas?.map((replica) => replica.ip);
           replicaList.each(function () {
             // remove not exist replica
-            if (!replicas?.includes($(this).text())) {
+            if (!replicaips?.includes($(this).text())) {
               $(this).parent().remove();
             }
-            replicaips.push($(this).text());
+            replicaipList.push($(this).text());
           });
 
-          if (master !== masterip) {
-            $('.master-ip').text(master);
+          if (master.ip !== masterip) {
+            $('.master-ip').text(master.ip);
           }
-          // create new replica
+          if (master.state === 'unhealthy') {
+            $('.dropdown-master .status').addClass('unhealthy');
+          } else {
+            $('.dropdown-master .status').removeClass('unhealthy');
+          }
+
           if (replicas) {
-            for (const replica of replicas) {
-              if (!replicaips.includes(replica)) {
-                const replicadiv = `<div class="dropdown-item d-flex align-items-center"><div class="status"></div><div class="replica-ip">${replica}</div></div>`;
+            for (let i = 0; i < replicas.length; i++) {
+              const replica = replicas[i];
+              // create new replica
+              if (!replicaipList.includes(replica.ip)) {
+                const replicadiv = `<div class="dropdown-item d-flex align-items-center"><div class="status"></div><div class="replica-ip">${replica.ip}</div></div>`;
                 $(replicadiv).appendTo($('#dropdown-content-replica'));
+              }
+              if (replica.state === 'unhealthy') {
+                $($('.dropdown-replica .status')[i]).addClass('unhealthy');
+              } else {
+                $($('.dropdown-replica .status')[i]).removeClass('unhealthy');
               }
             }
           }
@@ -257,10 +204,85 @@ $(() => {
     } catch (error) {
       console.log(error);
     }
-    setTimeout(update, updateInterval);
+  }
+
+  const produceForms = document.querySelectorAll('.needs-validation-produce');
+  // Prevent produce submission
+  Array.prototype.slice.call(produceForms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (form.checkValidity()) {
+          $.ajax({
+            url: '/api/1.0/queue/produce',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+              queue: $('#produce-queue').val(),
+              messages: [
+                $('#produce-messages').val(),
+              ],
+            }),
+          });
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+
+  const consumeForms = document.querySelectorAll('.needs-validation-consume');
+  // Prevent produce submission
+  Array.prototype.slice.call(consumeForms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (form.checkValidity()) {
+          $.ajax({
+            url: '/api/1.0/queue/consume',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+              queue: $('#consume-queue').val(),
+              quantity: $('#consume-quantity').val(),
+            }),
+          }).done((result) => {
+            Swal.fire(`Consume messages: ${result.messages}`);
+          });
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+
+  function deleteQueue(queue) {
+    $.ajax({
+      url: '/api/1.0/queue/delete',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify({
+        queue,
+      }),
+    }).done(() => {
+      console.log();
+      $(`#queue-${queue}`).slideUp(300, function () { $(`#queue-${queue}`).remove(); });
+      update();
+    });
+  }
+
+  function recursiveUpdate() {
+    update();
+    setTimeout(recursiveUpdate, updateInterval);
   }
   // INITIALIZE REALTIME DATA FETCHING
-  update();
+  recursiveUpdate();
   /*
   * END INTERACTIVE CHART
   */

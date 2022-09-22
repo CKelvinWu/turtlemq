@@ -33,6 +33,10 @@
   border-radius: 50%;
 }
 
+.unhealthy {
+  background-color: red;
+}
+
 .dropdown-item {
   width: 200px;
   color: black;

@@ -7,8 +7,9 @@ block content
     .login-icon 
       img.login-img(src="https://i.pinimg.com/originals/0b/18/d7/0b18d74a360882472be99d2ad8e9d966.gif", alt="")
     form.login-form
-      input.user(type='text' placeholder='username')
-      input.password(type='password' placeholder='password')
+      p.warn 
+      input.user(type='text' placeholder='username' value='turtle')
+      input.password(type='password' placeholder='password' value='turtle')
       button.btn#login login
   
   script(src='/public/js/login.js')

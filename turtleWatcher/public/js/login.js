@@ -17,18 +17,13 @@ $(() => {
         console.log('success');
         window.location.href = '/';
       },
-      // error: (err) => {
-      //   const errors = err.responseJSON?.errors;
-      //   const message = err.responseJSON?.message;
-      //   if (errors) {
-      //     for (const error of errors) {
-      //       $('.account-inputs').prepend(`<p class='error'>${error}</p>`);
-      //     }
-      //   }
-      //   if (message) {
-      //     $('.account-inputs').prepend(`<p class='error'>${message}</p>`);
-      //   }
-      // },
+      error: (err) => {
+        const message = err.responseJSON?.message;
+        if (message) {
+          console.log(message);
+          $('.warn').text(`${message}`);
+        }
+      },
     });
   });
 });

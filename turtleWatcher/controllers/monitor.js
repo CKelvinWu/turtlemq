@@ -4,7 +4,10 @@ const monitor = asyncHandler(async (req, res) => {
   res.render('monitor');
 });
 const login = asyncHandler(async (req, res) => {
-  res.render('login');
+  if (req.session.isAuth) {
+    return res.redirect('/');
+  }
+  return res.render('login', { isLogout: true });
 });
 
 module.exports = {
