@@ -1,9 +1,12 @@
+require('dotenv').config();
 const crypto = require('crypto');
 const {
-  stringToHostAndPort, getCurrentIp, getState, getMaster, setMaster,
-  setReplica, setState, publishToChannel, getReplicasConfig,
+  stringToHostAndPort, getCurrentIp, getMaster, setMaster,
+  setReplica, publishToChannel, getReplicasConfig,
 } = require('./util');
 const Turtlekeeper = require('./connection');
+
+const ROLE = process.env.ROLE || 'replica';
 
 const randomId = () => crypto.randomBytes(8).toString('hex');
 async function createConnection(config) {
@@ -22,18 +25,25 @@ class Group {
   async init() {
     // FIXME: shuld handle race condition and unhealthy replica
     this.ip = await getCurrentIp();
-    const state = await getState();
-    if (state && state !== 'active') return;
 
-    const master = await getMaster();
-    if (!state || master === this.ip) {
+    // const master = await getMaster();
+    // if (!state || master === this.ip) {
+    //   await setMaster(this.ip);
+    //   await setState('active');
+    //   this.role = 'master';
+    //   const message = { method: 'join', ip: this.ip, role: this.role };
+    //   await publishToChannel(message);
+    //   return;
+    // }
+    if (ROLE === 'master') {
       await setMaster(this.ip);
-      await setState('active');
-      this.role = 'master';
+      // await setState('active');
+      this.role = ROLE;
       const message = { method: 'join', ip: this.ip, role: this.role };
       await publishToChannel(message);
       return;
     }
+
     // check replica
     this.role = 'replica';
     // await redis.set(`turtlemq:replica:${this.ip}`, this.ip);

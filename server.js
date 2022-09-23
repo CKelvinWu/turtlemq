@@ -84,7 +84,6 @@ function createTurtleMQServer(requestHandler) {
     socket.on('error', () => {
       console.log('socket error ');
     });
-
     socket.write('{ "message": "connected" }\r\n\r\n');
   }
 
