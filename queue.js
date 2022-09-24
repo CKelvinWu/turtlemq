@@ -229,9 +229,9 @@ const setQueue = (req) => {
       maxLength, queue, head, tail,
     } = queueChannels[key];
     const queueObj = createQueue(key, maxLength);
-    queueObj.produce(queue, req);
-    group.queueChannels[key].head = head;
-    group.queueChannels[key].tail = tail;
+    queueObj.queue = queue;
+    queueObj.head = head;
+    queueObj.tail = tail;
   });
   return req.send({ success: true, message: 'set queue successifully' });
 };
