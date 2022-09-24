@@ -10,7 +10,7 @@ const redisConf = {
     username: process.env.REDIS_USER,
     password: process.env.REDIS_PASSWORD,
     retryStrategy() {
-      const delay = Math.min(5000000);
+      const delay = Math.min(5000);
       return delay;
     },
   },

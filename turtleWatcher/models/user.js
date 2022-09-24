@@ -25,4 +25,16 @@ const login = async (user, password) => {
   }
   throw new Error('Wrong password!');
 };
-module.exports = { login };
+
+const changePassword = async (currentPassword, newPassword) => {
+  const hash = await redis.hget(USER_KEY, DEFAULT_USER);
+  const isAuth = await argon2.verify(hash, currentPassword);
+  if (!isAuth) {
+    return { success: false, message: 'Wrong password!' };
+  }
+  const newHash = await argon2.hash(newPassword);
+  await redis.hset(USER_KEY, DEFAULT_USER, newHash);
+  return { success: true, message: 'Update password successifully!' };
+};
+
+module.exports = { login, changePassword };

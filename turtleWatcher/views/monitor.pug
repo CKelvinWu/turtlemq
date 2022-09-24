@@ -15,7 +15,7 @@ block content
           | Produce +
         button.btn.btn-primary.btn-block(type='button' data-bs-toggle='modal' data-bs-target='#consumeModal')
           | Consume -
-      .right-info.d-flex
+      .right-info.d-flex.align-items-center
         .dropdown.dropdown-master 
           button.dropbtn Master
           .dropdown-content 
@@ -25,6 +25,8 @@ block content
         .dropdown.dropdown-replica 
           button.dropbtn Replicas
           .dropdown-content#dropdown-content-replica
+        .setting(data-bs-toggle='modal' data-bs-target='#settingModal') 
+          i.fas.fa-cogs
         
     #produceModal.modal
       .modal-dialog.modal-lg
@@ -71,6 +73,29 @@ block content
                     | Please fill in a positive number.
               .modal-footer
                   button.btn.btn-primary(type='submit') Consume
+    #settingModal.modal
+      .modal-dialog.modal-lg
+        .modal-content
+          .modal-header
+            h4.modal-title Setting
+            button.btn-close(type='button' data-bs-dismiss='modal')
+          .modal-body
+            form.row.g-3.needs-validation-password(novalidate='')
+              div
+                label.form-label(for='validationCustomUsername') Current Password
+                .input-group.has-validation
+                  input.form-control#currentPassword(type='password' aria-describedby='inputGroupPrepend' required)
+                  .invalid-feedback
+                    | Please fill in current password.
+              div
+                label.form-label(for='validationCustomUsername') New Password
+                .input-group.has-validation
+                  input.form-control#newPassword(type='password' min='1' aria-describedby='inputGroupPrepend' required)
+                  .invalid-feedback
+                    | Please fill in new password.
+              .modal-footer
+                  button.btn.btn-primary(type='submit') Setting
+      
 
     #chart-container
   script(src='/public/js/monitor.js')

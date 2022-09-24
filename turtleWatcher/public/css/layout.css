@@ -5,10 +5,8 @@
   --green: #588157;
 }
 
-*{ 
-  /* font-family: "Lucida Grande"; */
-  font-family: 'FEDORA', sans-serif;
-                                                
+* { 
+  font-family: 'PF Din Text Cond Pro Medium', sans-serif;
 }
 
 *,*::after,*::before {

@@ -206,7 +206,7 @@ $(() => {
     }
   }
 
-  const produceForms = document.querySelectorAll('.needs-validation-produce');
+  const produceForms = $('.needs-validation-produce');
   // Prevent produce submission
   Array.prototype.slice.call(produceForms)
     .forEach(function (form) {
@@ -233,7 +233,7 @@ $(() => {
       }, false);
     });
 
-  const consumeForms = document.querySelectorAll('.needs-validation-consume');
+  const consumeForms = $('.needs-validation-consume');
   // Prevent produce submission
   Array.prototype.slice.call(consumeForms)
     .forEach(function (form) {
@@ -253,6 +253,37 @@ $(() => {
             }),
           }).done((result) => {
             Swal.fire(`Consume messages: ${result.messages}`);
+          });
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+
+  const changePasswordForms = $('.needs-validation-password');
+  // Prevent produce submission
+  Array.prototype.slice.call(changePasswordForms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (form.checkValidity()) {
+          $.ajax({
+            url: '/api/1.0/user/password',
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+              currentPassword: $('#currentPassword').val(),
+              newPassword: $('#newPassword').val(),
+            }),
+          }).done((result) => {
+            console.log(result);
+            Swal.fire(`${result.responseJSON.message}`);
+          }).fail((result) => {
+            console.log(result.responseJSON.message);
+            Swal.fire(`${result.responseJSON.message}`);
           });
         }
 

@@ -23,7 +23,17 @@ const logout = asyncHandler(async (req, res) => {
   res.redirect('/login');
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const message = await User.changePassword(currentPassword, newPassword);
+  if (!message.success) {
+    return res.status(403).json(message);
+  }
+  return res.status(200).json(message);
+});
+
 module.exports = {
   login,
   logout,
+  changePassword,
 };

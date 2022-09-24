@@ -60,6 +60,17 @@
   color: #ffffff;
 }
 
+.setting {
+  cursor: pointer;
+  line-height: 1;
+  font-size: 24px;
+}
+
+.setting:hover {
+  cursor: pointer;
+  color: var(--green);
+}
+
 .queue-container {
   margin-bottom: auto;
 }
