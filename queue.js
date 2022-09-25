@@ -87,6 +87,13 @@ class Queue extends EventEmitter {
   consume(req) {
     // Hang the consumer if queue is empty
     if (this.queue[this.tail] === undefined || this.queue[this.tail] === null) {
+      req.send({
+        id: req.body.id,
+        method: 'consume',
+        queue: this.name,
+        success: true,
+        pending: true,
+      });
       this.subscribers.push(req);
       return null;
     }

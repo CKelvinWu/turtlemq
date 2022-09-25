@@ -58,7 +58,7 @@ const getQueue = async () => {
     queueInfo[queue] = {};
     queueInfo[queue].queueSize = data;
     queueInfo[queue].maxLength = maxLength;
-    console.log(queueInfo[queue]);
+    // console.log(queueInfo[queue]);
   }
   const result = {};
   result.queueInfo = queueInfo;
@@ -75,7 +75,7 @@ const getQueue = async () => {
       const replica = replicas[i];
       const replicaVotes = await getVotes(replica);
       const replicaState = replicaVotes.length ? 'unhealthy' : 'active';
-      console.log({ ip: replica, state: replicaState, votes: replicaVotes.length });
+      // console.log({ ip: replica, state: replicaState, votes: replicaVotes.length });
       result.replicas.push({ ip: replica, state: replicaState, votes: replicaVotes.length });
     }
   }
