@@ -226,6 +226,11 @@ $(() => {
                 $('#produce-messages').val(),
               ],
             }),
+          }).done(() => {
+            $('.produce-success').slideDown(500, () => {});
+            setTimeout(() => {
+              $('.produce-success').slideUp(500, () => {});
+            }, 2000);
           });
         }
 

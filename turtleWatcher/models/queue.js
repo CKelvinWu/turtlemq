@@ -51,6 +51,7 @@ const getQueue = async () => {
         }
       }
     }
+    console.log(data);
 
     // // push current time stamp
     // data.push({ time, queueSize: data.at(-1)?.queueSize });
