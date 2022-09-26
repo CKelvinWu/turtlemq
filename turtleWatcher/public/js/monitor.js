@@ -160,7 +160,7 @@ $(() => {
             // interactivePlot.setupGrid();
             interactivePlot.draw();
             const percentage = (res.at(-1)[1] / maxLength) * 100;
-            $(`#bar-${name}`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.9 * percentage + 10}%` }, 800).text(`${Math.round(percentage, 2)}%`);
+            $(`#bar-${name}`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.88 * percentage + 12}%` }, 800).text(`${Math.round(percentage, 2)}%`);
           });
 
           // render master and replicas
