@@ -89,7 +89,7 @@ $(() => {
           const { queueInfo, master, replicas } = result;
           const queueName = Object.keys(queueInfo);
           $('.interactive').each(function () {
-            const queue = $(this).data('queue');
+            const queue = $(this).data('queue').toString();
             const isExistQueue = queueName.includes(queue);
             if (!isExistQueue) {
               deletePlot(queue);
