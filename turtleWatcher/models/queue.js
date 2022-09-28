@@ -47,8 +47,8 @@ const getQueue = async () => {
             data.push({ time: history.time, queueSize: previousHistory.queueSize });
           }
           data.push(history);
-          previousHistory = history;
         }
+        previousHistory = history;
       }
     }
     console.log(data);
