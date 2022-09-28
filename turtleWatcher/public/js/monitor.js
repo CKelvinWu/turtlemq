@@ -20,16 +20,17 @@ $(() => {
   }
 
   function createPlot(name) {
-    const chartBody = $('<div></div>').addClass('card-body').attr('id', `queue-${name}`);
+    const chartBody = $('<div></div>').addClass('card-body').attr('data-queue', `${name}`);
     const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center');
-    const queueTitleH3 = $('<h3></h3>').addClass('card-title').text(`queue ${name}`);
-    const queueCapacity = $('<spam></span>').addClass(`${name}-queue-size queue-size`);
+    const queueTitleH3 = $('<h3></h3>').addClass('card-title').text('queue ');
+    const queueSpan = $('<span></span>').addClass('queueName').text(`${name}`);
+    const queueCapacity = $('<span></span>').addClass('queue-size').attr('data-queue', `${name}`);
     const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
-    const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name} delete-btn`);
-    const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('id', `bar-${name}`);
-    const interactiveDiv = $('<div></div>').addClass('interactive').attr('id', `interactive-${name}`).attr('data-queue', name)
-      .css({ height: '300px', padding: '0px', position: 'relative' });
+    const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name} delete-btn`).attr('data-delete', `${name}`);
+    const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('data-queue', `${name}`);
+    const interactiveDiv = $('<div></div>').addClass('interactive').attr('data-queue', `${name}`).css({ height: '300px', padding: '0px', position: 'relative' });
 
+    queueSpan.appendTo(queueTitleH3);
     queueTitleH3.appendTo(progressBarContainer);
     progressBarHolderDiv.appendTo(progressBarContainer);
     queueCapacity.appendTo(progressBarContainer);
@@ -45,7 +46,7 @@ $(() => {
       opacity: 0.8,
     }).appendTo('body');
 
-    $(`.delete-${name}`).on('click', () => {
+    $(`.delete-btn[data-delete='${name}`).on('click', () => {
       const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
           confirmButton: 'btn btn-danger',
@@ -79,7 +80,7 @@ $(() => {
   }
 
   function deletePlot(name) {
-    $(`#queue-${name}`).slideUp(500, function () { $(`#queue-${name}`).remove(); });
+    $(`.card-body[data-queue='${name}']`).slideUp(500, function () { $(`.card-body[data-queue='${name}']`).remove(); });
   }
 
   function update() {
@@ -87,25 +88,26 @@ $(() => {
       $.ajax('/api/1.0/queue')
         .done((result) => {
           const { queueInfo, master, replicas } = result;
-          const queueName = Object.keys(queueInfo);
+          const queueNames = Object.keys(queueInfo);
           $('.interactive').each(function () {
-            const queue = $(this).data('queue').toString();
-            const isExistQueue = queueName.includes(queue);
+            const queue = $(this).data('queue');
+            // console.log($(this).prev().children().children().html());
+            const isExistQueue = queueNames.includes(queue);
             if (!isExistQueue) {
               deletePlot(queue);
             }
           });
 
-          queueName.forEach((name) => {
-            const isPlot = $(`#interactive-${name}`).length;
+          queueNames.forEach((name) => {
+            const card = $(`.card-body[data-queue='${name}']`);
             const { maxLength } = queueInfo[name];
             const { queueSize } = queueInfo[name].queueSize.at(-1);
-            if (!isPlot) {
+            if (!card.length) {
               createPlot(name);
-              $(`#interactive-${name}`).bind('plothover', function (event, pos, item) {
+              // const interactive = card.children('.interactive');
+              $(`.interactive[data-queue='${name}']`).bind('plothover', function (event, pos, item) {
                 if (item) {
                   const y = item.datapoint[1].toFixed(0);
-
                   $('#line-chart-tooltip').html(`${y}`)
                     .css({
                       top: item.pageY + 5,
@@ -118,10 +120,11 @@ $(() => {
               });
             }
             // update queue size
-            $(`.${name}-queue-size`).text(`${queueSize} / ${maxLength}`);
+
+            $(`.queue-size[data-queue='${name}']`).text(`${queueSize} / ${maxLength}`);
             const res = getData(queueInfo[name].queueSize);
             const interactivePlot = $.plot(
-              `#interactive-${name}`,
+              `.interactive[data-queue='${name}']`,
               [
                 {
                   label: name,
@@ -160,7 +163,7 @@ $(() => {
             // interactivePlot.setupGrid();
             interactivePlot.draw();
             const percentage = (res.at(-1)[1] / maxLength) * 100;
-            $(`#bar-${name}`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.88 * percentage + 12}%` }, 800).text(`${Math.round(percentage, 2)}%`);
+            $(`.bar[data-queue='${name}']`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.88 * percentage + 12}%` }, 800).text(`${Math.round(percentage, 2)}%`);
           });
 
           // render master and replicas
@@ -257,7 +260,7 @@ $(() => {
               quantity: $('#consume-quantity').val(),
             }),
           }).done((result) => {
-            Swal.fire(`Consume messages: ${result.messages}`);
+            Swal.fire(`Consume messages: ${JSON.stringify(result.messages).replace(/</g, '&lt;').replace(/>/g, '&gt;')}`);
           });
         }
 
@@ -308,7 +311,7 @@ $(() => {
       }),
     }).done(() => {
       console.log();
-      $(`#queue-${queue}`).slideUp(300, function () { $(`#queue-${queue}`).remove(); });
+      $(`.card-body[data-queue='${queue}']`).slideUp(300, function () { $(`.card-body[data-queue='${queue}']`).remove(); });
       update();
     });
   }
