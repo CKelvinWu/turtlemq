@@ -22,7 +22,7 @@ $(() => {
   function createPlot(name) {
     const chartBody = $('<div></div>').addClass('card-body').attr('data-queue', `${name}`);
     const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center');
-    const queueTitleH3 = $('<h3></h3>').addClass('card-title').text('queue ');
+    const queueTitleH3 = $('<img src="/public/images/turtle1.png">').addClass('turtle-icon');
     const queueSpan = $('<span></span>').addClass('queueName').text(`${name}`);
     const queueCapacity = $('<span></span>').addClass('queue-size').attr('data-queue', `${name}`);
     const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
@@ -30,8 +30,8 @@ $(() => {
     const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('data-queue', `${name}`);
     const interactiveDiv = $('<div></div>').addClass('interactive').attr('data-queue', `${name}`).css({ height: '300px', padding: '0px', position: 'relative' });
 
-    queueSpan.appendTo(queueTitleH3);
     queueTitleH3.appendTo(progressBarContainer);
+    queueSpan.appendTo(progressBarContainer);
     progressBarHolderDiv.appendTo(progressBarContainer);
     queueCapacity.appendTo(progressBarContainer);
     trashIcon.appendTo(progressBarContainer);

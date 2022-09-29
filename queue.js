@@ -218,11 +218,11 @@ const consume = (req) => {
 };
 
 const deleteQueue = async (req) => {
-  const { queue } = req.body;
-  console.log(queue);
+  const { queue: name } = req.body;
   try {
-    await deleteQueues(queue);
-    group.queueChannels[queue]?.delete(req);
+    const queueObj = createQueue(name);
+    await deleteQueues(name);
+    queueObj.delete(req);
   } catch (error) {
     console.log(error);
     req.send({ success: false, message: 'delete error' });

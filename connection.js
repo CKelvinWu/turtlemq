@@ -1,10 +1,11 @@
 const net = require('net');
-const { getReqHeader } = require('./util');
 
 class Turtlekeeper {
   constructor(config) {
     this.config = config;
     this.unhealthyCount = 0;
+    this.socket = new net.Socket();
+    this.socket.setKeepAlive(true, 5000);
   }
 
   async reconnect() {
@@ -24,17 +25,29 @@ class Turtlekeeper {
 
   async connect() {
     return new Promise((resolve, reject) => {
-      const client = net.connect(this.config);
+      const client = this.socket.connect(this.config);
+      let reqBuffer = Buffer.from('');
+      client.on('readable', () => {
+        const buf = client.read();
+        reqBuffer = Buffer.concat([reqBuffer, buf]);
 
-      client.once('readable', () => {
-        const reqHeader = getReqHeader(client);
-        if (!reqHeader) return;
-        const object = JSON.parse(reqHeader);
+        while (true) {
+          if (reqBuffer === null) break;
+          // Indicating end of a request
+          const marker = reqBuffer.indexOf('\r\n\r\n');
+          // Find no seperator
+          if (marker === -1) break;
+          // Record the data after \r\n\r\n
+          const reqHeader = reqBuffer.slice(0, marker).toString();
+          // Keep hte extra readed data in the reqBuffer
+          reqBuffer = reqBuffer.slice(marker + 4);
 
-        if (object.message === 'connected') {
-          resolve(this);
+          const object = JSON.parse(reqHeader);
+          if (object.message === 'connected') {
+            resolve(this);
+          }
+          reject();
         }
-        reject();
       });
 
       client.on('error', (error) => {

@@ -3,7 +3,7 @@ const net = require('net');
 const queueRoutes = require('./queue');
 const group = require('./group');
 const { redis } = require('./redis');
-const { getCurrentIp, getReqHeader, deleteQueues } = require('./util');
+const { getCurrentIp, deleteQueues } = require('./util');
 
 const { PORT, CHANNEL, QUEUE_LIST } = process.env;
 let ip;
@@ -55,18 +55,28 @@ function createTurtleMQServer(requestHandler) {
   });
 
   function connectionHandler(socket) {
+    let reqBuffer = Buffer.from('');
     socket.on('readable', () => {
-      // catch none tmqp request
-      try {
-        const reqHeader = getReqHeader(socket);
+      const buf = socket.read();
+      reqBuffer = Buffer.concat([reqBuffer, buf]);
 
-        if (!reqHeader) return;
+      while (true) {
+        if (reqBuffer === null) break;
+        // Indicating end of a request
+        const marker = reqBuffer.indexOf('\r\n\r\n');
+        // Find no seperator
+        if (marker === -1) break;
+        // Record the data after \r\n\r\n
+        const reqHeader = reqBuffer.slice(0, marker).toString();
+        // Keep hte extra readed data in the reqBuffer
+        reqBuffer = reqBuffer.slice(marker + 4);
+
         const body = JSON.parse(reqHeader);
         const request = {
           body,
           socket,
           send(data) {
-            console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
+            // console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
             const message = `${JSON.stringify(data)}\r\n\r\n`;
             socket.write(message);
           },
@@ -77,8 +87,6 @@ function createTurtleMQServer(requestHandler) {
 
         // Send the request to the handler
         requestHandler(request);
-      } catch (error) {
-        console.log(error);
       }
     });
     socket.on('error', () => {
@@ -92,7 +100,7 @@ function createTurtleMQServer(requestHandler) {
 }
 
 const webServer = createTurtleMQServer(async (req) => {
-  console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
+  // console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
   const { method } = req.body;
   req.role = group.role;
   // response self role only
