@@ -27,8 +27,8 @@ class Turtlekeeper {
     return new Promise((resolve, reject) => {
       const client = this.socket.connect(this.config);
       let reqBuffer = Buffer.from('');
-      client.on('readable', () => {
-        const buf = client.read();
+      client.on('data', (buf) => {
+        // const buf = client.read();
         if (!buf) return;
         reqBuffer = Buffer.concat([reqBuffer, buf]);
 

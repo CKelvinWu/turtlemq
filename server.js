@@ -56,8 +56,8 @@ function createTurtleMQServer(requestHandler) {
 
   function connectionHandler(socket) {
     let reqBuffer = Buffer.from('');
-    socket.on('readable', () => {
-      const buf = socket.read();
+    socket.on('data', (buf) => {
+      // const buf = socket.read();
       if (!buf) return;
       reqBuffer = Buffer.concat([reqBuffer, buf]);
 
