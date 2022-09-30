@@ -155,7 +155,7 @@ const saveHistory = async () => {
       return;
     }
 
-    // history exceed interval
+    // history queue size remain the same
     const { time, queueSize: lastQueueSize } = JSON.parse(latestHistory);
     if (lastQueueSize === queueSize) {
       return;
@@ -169,8 +169,13 @@ const saveHistory = async () => {
 
     // remove old history
     const historyLength = await redis.llen(historyKey);
-    if (historyLength > (2 * MIN_KEEPED_HISTROY_TIME) / HISTORY_INTERVAL) {
-      await redis.lrem(historyKey, historyLength - MIN_KEEPED_HISTROY_TIME / HISTORY_INTERVAL);
+    const maxCountOfSavedHistory = (2 * MIN_KEEPED_HISTROY_TIME) / HISTORY_INTERVAL;
+    if (historyLength > maxCountOfSavedHistory) {
+      await redis.ltrim(
+        historyKey,
+        -maxCountOfSavedHistory - 1,
+        -1,
+      );
     }
   });
   setTimeout(() => {
