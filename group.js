@@ -1,8 +1,8 @@
 require('dotenv').config();
 const crypto = require('crypto');
 const {
-  stringToHostAndPort, getCurrentIp, getMaster, setMaster,
-  setReplica, publishToChannel, getReplicasConfig,
+  stringToHostAndPort, getCurrentIp, setMaster,
+  setPending, publishToChannel, getReplicasConfig,
 } = require('./util');
 const Turtlekeeper = require('./connection');
 
@@ -25,19 +25,8 @@ class Group {
   async init() {
     // FIXME: shuld handle race condition and unhealthy replica
     this.ip = await getCurrentIp();
-
-    // const master = await getMaster();
-    // if (!state || master === this.ip) {
-    //   await setMaster(this.ip);
-    //   await setState('active');
-    //   this.role = 'master';
-    //   const message = { method: 'join', ip: this.ip, role: this.role };
-    //   await publishToChannel(message);
-    //   return;
-    // }
     if (ROLE === 'master') {
       await setMaster(this.ip);
-      // await setState('active');
       this.role = ROLE;
       const message = { method: 'join', ip: this.ip, role: this.role };
       await publishToChannel(message);
@@ -46,8 +35,7 @@ class Group {
 
     // check replica
     this.role = 'replica';
-    // await redis.set(`turtlemq:replica:${this.ip}`, this.ip);
-    await setReplica(this.ip);
+    await setPending(this.ip);
     const message = { method: 'join', ip: this.ip, role: this.role };
     await publishToChannel(message);
   }
