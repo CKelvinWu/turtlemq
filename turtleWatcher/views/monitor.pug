@@ -2,7 +2,7 @@ extends  layout.pug
 block head 
   script(src='/public/plugins/dayjs.min.js')
   script(src='/public/plugins/jquery.flot.js')
-  script(src='/public/plugins/bootstrap.bundle.min.js')  
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js')  
   link(rel="stylesheet", href="/public/css/monitor.css")
   
 
@@ -85,13 +85,13 @@ block content
               div
                 label.form-label(for='validationCustomUsername') Current Password
                 .input-group.has-validation
-                  input.form-control#currentPassword(type='password' aria-describedby='inputGroupPrepend' required)
+                  input.form-control#currentPassword(type='password' aria-describedby='inputGroupPrepend' autocomplete="on" required)
                   .invalid-feedback
                     | Please fill in current password.
               div
                 label.form-label(for='validationCustomUsername') New Password
                 .input-group.has-validation
-                  input.form-control#newPassword(type='password' min='1' aria-describedby='inputGroupPrepend' required)
+                  input.form-control#newPassword(type='password' min='1' aria-describedby='inputGroupPrepend' autocomplete="on" required)
                   .invalid-feedback
                     | Please fill in new password.
               .modal-footer

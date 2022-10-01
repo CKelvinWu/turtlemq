@@ -99,6 +99,17 @@ nav:hover {
   color: #000;
 }
 
+.btn-check:checked+.btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check)+.btn:active {
+  background-color: var(--hover-green);
+  color: #000;
+}
+
+.btn:focus-visible {  
+  background-color: var(--hover-green);
+  color: #000;
+  border-color: var(--dark-green);
+}
+
 
 .input-group-prepend {
   text-align: center;

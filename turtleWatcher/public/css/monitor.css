@@ -75,6 +75,10 @@
   margin-bottom: auto;
 }
 
+.progress-bar-container {
+  cursor: pointer;
+}
+
 .progress-bar-holder{
   width: 440px;
   background-color: #f5f5f5;
@@ -92,7 +96,6 @@
   text-align: right;
   background: var(--green);
   width: 10%;
-  padding: 0.8em;
   white-space: nowrap;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -165,9 +168,9 @@
   margin-right: auto;
 }
 
-.queueName {
+.queue-name {
   margin-left: 8px;
-  font-size: 32px;
+  font-size: 24px;
 }
 
 .delete-btn {

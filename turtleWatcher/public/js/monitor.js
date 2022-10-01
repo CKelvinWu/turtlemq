@@ -21,9 +21,9 @@ $(() => {
 
   function createPlot(name) {
     const chartBody = $('<div></div>').addClass('card-body').attr('data-queue', `${name}`);
-    const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center');
+    const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center').attr('data-queue', `${name}`);
     const queueTitleH3 = $('<img src="/public/images/turtle1.png">').addClass('turtle-icon');
-    const queueSpan = $('<span></span>').addClass('queueName').text(`${name}`);
+    const queueSpan = $('<span></span>').addClass('queue-name').text(`${name}`);
     const queueCapacity = $('<span></span>').addClass('queue-size').attr('data-queue', `${name}`);
     const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
     const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name} delete-btn`).attr('data-delete', `${name}`);
@@ -46,7 +46,17 @@ $(() => {
       opacity: 0.8,
     }).appendTo('body');
 
-    $(`.delete-btn[data-delete='${name}`).on('click', () => {
+    $(`.progress-bar-container[data-queue='${name}`).on('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).next().toggle('slow', () => {
+        update();
+      });
+    });
+
+    $(`.delete-btn[data-delete='${name}`).on('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
           confirmButton: 'btn btn-danger',
@@ -162,8 +172,15 @@ $(() => {
             // Since the axes don't change, we don't need to call plot.setupGrid()
             // interactivePlot.setupGrid();
             interactivePlot.draw();
+            const threshold = 10;
             const percentage = (res.at(-1)[1] / maxLength) * 100;
-            $(`.progress-bar[data-queue='${name}']`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${0.88 * percentage + 12}%` }, 800).text(`${Math.round(percentage, 2)}%`);
+            if (percentage > threshold) {
+              $(`.progress-bar[data-queue='${name}']`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${percentage}%` }, 800).text(`${Math.round(percentage, 2)}%`);
+            } else {
+              $(`.progress-bar[data-queue='${name}']`).css({
+                transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${percentage}%`, overflow: 'visible', color: 'black',
+              }, 800).text(`${Math.round(percentage, 2)}%`);
+            }
           });
 
           // render master and replicas
