@@ -83,7 +83,7 @@
   width: 440px;
   background-color: #f5f5f5;
   padding: 0.2em;
-  margin: 1em 0.2em;
+  margin: 0.5em 0.2em;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -127,6 +127,13 @@
   color: #000;
 }
 
+.btn-danger {
+  background-color: var(--danger) !important;
+}
+.btn-danger:hover, .btn-danger:active  {
+  background-color: var(--danger-hover) !important;
+}
+
 
 .input-group-prepend {
   text-align: center;
@@ -155,7 +162,7 @@
 }
 
 .turtle-icon {
-  margin-left: 50px;
+  margin-left: 36px;
   width: 40px;
 }
 
@@ -164,8 +171,7 @@
 }
 
 .queue-size {
-  margin-left: 8px;
-  margin-right: auto;
+  margin-right: 40px;
 }
 
 .queue-name {
@@ -177,12 +183,13 @@
   margin-right: 36px;
 }
 
+
 .fa-trash-can {
   line-height: 1.5;
 }
 
 .fa-trash-can:hover {
-  color: #ef5350;
+  color: var(--danger);
 }
 
 .swal2-styled.swal2-confirm {

@@ -21,7 +21,11 @@ $(() => {
 
   function createPlot(name) {
     const chartBody = $('<div></div>').addClass('card-body').attr('data-queue', `${name}`);
-    const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center').attr('data-queue', `${name}`);
+    const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center justify-content-between').attr('data-queue', `${name}`);
+
+    const leftDiv = $('<div></div>').addClass('left-bar');
+    const middleDiv = $('<div></div>').addClass('middle-bar d-flex align-items-center');
+
     const queueTitleH3 = $('<img src="/public/images/turtle1.png">').addClass('turtle-icon');
     const queueSpan = $('<span></span>').addClass('queue-name').text(`${name}`);
     const queueCapacity = $('<span></span>').addClass('queue-size').attr('data-queue', `${name}`);
@@ -30,12 +34,17 @@ $(() => {
     const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('data-queue', `${name}`);
     const interactiveDiv = $('<div></div>').addClass('interactive').attr('data-queue', `${name}`).css({ height: '300px', padding: '0px', position: 'relative' });
 
-    queueTitleH3.appendTo(progressBarContainer);
-    queueSpan.appendTo(progressBarContainer);
-    progressBarHolderDiv.appendTo(progressBarContainer);
-    queueCapacity.appendTo(progressBarContainer);
-    trashIcon.appendTo(progressBarContainer);
+    queueTitleH3.appendTo(leftDiv);
+    queueSpan.appendTo(leftDiv);
+
     progressBarDiv.appendTo(progressBarHolderDiv);
+    progressBarHolderDiv.appendTo(middleDiv);
+    queueCapacity.appendTo(middleDiv);
+    trashIcon.appendTo(middleDiv);
+
+    leftDiv.appendTo(progressBarContainer);
+    middleDiv.appendTo(progressBarContainer);
+
     progressBarContainer.appendTo(chartBody);
     interactiveDiv.appendTo(chartBody);
     $('#chart-container').append(chartBody);
@@ -73,18 +82,8 @@ $(() => {
         confirmButtonText: 'Yes, delete it!',
         cancelButtonText: 'No, cancel!',
         reverseButtons: true,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          deleteQueue(name);
-          swalWithBootstrapButtons.fire(
-            'Deleted!',
-            `'${name}' has been deleted.`,
-            'success',
-          );
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        );
+      }).then(() => {
+        deleteQueue(name);
       });
     });
   }
@@ -175,7 +174,9 @@ $(() => {
             const threshold = 10;
             const percentage = (res.at(-1)[1] / maxLength) * 100;
             if (percentage > threshold) {
-              $(`.progress-bar[data-queue='${name}']`).css({ transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${percentage}%` }, 800).text(`${Math.round(percentage, 2)}%`);
+              $(`.progress-bar[data-queue='${name}']`).css({
+                transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${percentage}%`, color: 'white',
+              }, 800).text(`${Math.round(percentage, 2)}%`);
             } else {
               $(`.progress-bar[data-queue='${name}']`).css({
                 transition: ' 0.5s', 'transition-timing-function': 'linear', width: `${percentage}%`, overflow: 'visible', color: 'black',

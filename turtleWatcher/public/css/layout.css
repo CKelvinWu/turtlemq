@@ -3,6 +3,8 @@
   --background-primary: #e5e5e5;
   --hover-green: #7e9971;
   --green: #588157;
+  --danger: #c81d25;
+  --danger-hover: #ad2e24;
 }
 
 * { 
@@ -95,6 +97,10 @@ nav:hover {
 }
 
 .btn-primary:first-child:hover, :not(.btn-check)+.btn-primary:hover{
+  background-color: var(--hover-green);
+  color: #000;
+}
+.btn:first-child:hover, :not(.btn-check)+.btn:hover{
   background-color: var(--hover-green);
   color: #000;
 }
