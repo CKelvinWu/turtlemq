@@ -23,8 +23,8 @@ $(() => {
     const chartBody = $('<div></div>').addClass('card-body').attr('data-queue', `${name}`);
     const progressBarContainer = $('<div></div>').addClass('progress-bar-container d-flex align-items-center justify-content-between').attr('data-queue', `${name}`);
 
-    const leftDiv = $('<div></div>').addClass('left-bar');
-    const middleDiv = $('<div></div>').addClass('middle-bar d-flex align-items-center');
+    const leftDiv = $('<div></div>').addClass('left-bar d-flex align-items-center');
+    const rightDiv = $('<div></div>').addClass('right-bar d-flex align-items-center');
 
     const queueTitleH3 = $('<img src="/public/images/turtle1.png">').addClass('turtle-icon');
     const queueSpan = $('<span></span>').addClass('queue-name').text(`${name}`);
@@ -38,12 +38,12 @@ $(() => {
     queueSpan.appendTo(leftDiv);
 
     progressBarDiv.appendTo(progressBarHolderDiv);
-    progressBarHolderDiv.appendTo(middleDiv);
-    queueCapacity.appendTo(middleDiv);
-    trashIcon.appendTo(middleDiv);
+    progressBarHolderDiv.appendTo(leftDiv);
+    queueCapacity.appendTo(leftDiv);
+    trashIcon.appendTo(rightDiv);
 
     leftDiv.appendTo(progressBarContainer);
-    middleDiv.appendTo(progressBarContainer);
+    rightDiv.appendTo(progressBarContainer);
 
     progressBarContainer.appendTo(chartBody);
     interactiveDiv.appendTo(chartBody);

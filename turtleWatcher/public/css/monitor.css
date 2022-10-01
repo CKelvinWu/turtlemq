@@ -74,13 +74,21 @@
 .queue-container {
   margin-bottom: auto;
 }
+.left-bar {
+  width: 80%;
+}
+.right-bar {
+  display: flex;
+  justify-content: flex-end;
+  width: 20%;
+}
 
 .progress-bar-container {
   cursor: pointer;
 }
 
 .progress-bar-holder{
-  width: 440px;
+  width: 50%;
   background-color: #f5f5f5;
   padding: 0.2em;
   margin: 0.5em 0.2em;
@@ -172,10 +180,12 @@
 
 .queue-size {
   margin-right: 40px;
+  width:20%
 }
 
 .queue-name {
   margin-left: 8px;
+  width: 20%;
   font-size: 24px;
 }
 
