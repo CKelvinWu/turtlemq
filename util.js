@@ -3,7 +3,7 @@ require('dotenv').config();
 const { redis } = require('./redis');
 
 const {
-  NODE_ENV, PORT, MASTER_KEY, REPLICA_KEY, CHANNEL, QUEUE_LIST, HISTORY_KEY,
+  NODE_ENV, PORT, MASTER_KEY, REPLICA_KEY, PENDING_KEY, CHANNEL, QUEUE_LIST, HISTORY_KEY,
 } = process.env;
 
 async function getCurrentIp() {
@@ -24,13 +24,8 @@ function stringToHostAndPort(address) {
   return { host: address.split(':')[0], port: address.split(':')[1] };
 }
 
-async function getMaster() {
-  const master = await redis.get(MASTER_KEY);
-  return master;
-}
-
-async function setMaster(IP) {
-  await redis.set(MASTER_KEY, IP);
+async function setMaster(ip) {
+  await redis.set(MASTER_KEY, ip);
 }
 
 async function getReplicas() {
@@ -44,8 +39,9 @@ async function getReplicasConfig() {
   return replicasConfig;
 }
 
-async function setReplica(key) {
-  await redis.hset(REPLICA_KEY, key, 1);
+async function setPending(key) {
+  // await redis.hset(REPLICA_KEY, key, 1);
+  await redis.sadd(PENDING_KEY, key);
 }
 
 async function publishToChannel(message) {
@@ -61,10 +57,9 @@ const deleteQueues = (name) => {
 module.exports = {
   stringToHostAndPort,
   getCurrentIp,
-  getMaster,
   setMaster,
   getReplicas,
-  setReplica,
+  setPending,
   publishToChannel,
   getReplicasConfig,
   deleteQueues,

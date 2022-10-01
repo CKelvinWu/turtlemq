@@ -66,7 +66,7 @@ class Queue extends EventEmitter {
 
     for (let i = 0; i < messages.length; i++) {
       const message = messages[i];
-      this.queue[head] = message;
+      this.queue[this.head] = message;
       this.forwardHead();
     }
     req.send({
