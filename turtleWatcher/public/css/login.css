@@ -57,8 +57,8 @@
   transition: all 0.3 ease;
   cursor: pointer;
 }
-.form button:hover {
-  background: #43A047;
+.login-form #login:hover {
+  background: var(--hover-green);
 }
 .form .message {
   margin: 15px 0 0;
