@@ -87,6 +87,10 @@
   cursor: pointer;
 }
 
+.progress-bar-container:hover .fa-chevron-up{
+  color: var(--green);
+}
+
 .progress-bar-holder{
   width: 50%;
   background-color: #f5f5f5;
@@ -162,11 +166,26 @@
 }
 
 .card-body {
+  position: relative;
+  transition: 0.5s;
+  height: 410px;
+  overflow: hidden;
   margin-top: 10px;
   padding: 10px;
   border: var(--green) 1px solid;
   border-radius: 24px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.fold-card {
+  height: 100px;
+}
+
+.interactive-wrap {
+  position: absolute; 
+  top: 100px;
+  width: 100%;
+  height: 100%;
 }
 
 .turtle-icon {
@@ -190,16 +209,29 @@
 }
 
 .delete-btn {
-  margin-right: 36px;
+  margin-right: 24px;
 }
 
 
 .fa-trash-can {
   line-height: 1.5;
+  padding: 0 10px;
 }
 
 .fa-trash-can:hover {
   color: var(--danger);
+}
+
+.fa-chevron-up {
+  margin-right: 24px;
+  line-height: 1.5;
+  color: var(--dark-green);
+  transform: rotate(0deg);
+  /* transition: 0.6s !important; */
+}
+
+.card-body .fa-chevron-up.active{
+  transform: rotate(180deg);
 }
 
 .swal2-styled.swal2-confirm {

@@ -31,7 +31,10 @@ $(() => {
     const queueCapacity = $('<span></span>').addClass('queue-size').attr('data-queue', `${name}`);
     const progressBarHolderDiv = $('<div></div>').addClass('progress-bar-holder');
     const trashIcon = $('<a><i class="fa-solid fa-trash-can"></i></a>').addClass(`delete-${name} delete-btn`).attr('data-delete', `${name}`);
+    const arrowIcon = $('<i class="fas fa-chevron-up"></i>');
     const progressBarDiv = $('<div></div>').addClass('progress-bar').attr('data-queue', `${name}`);
+
+    const interactiveWrap = $('<div></div>').addClass('interactive-wrap');
     const interactiveDiv = $('<div></div>').addClass('interactive').attr('data-queue', `${name}`).css({ height: '300px', padding: '0px', position: 'relative' });
 
     queueTitleH3.appendTo(leftDiv);
@@ -41,12 +44,14 @@ $(() => {
     progressBarHolderDiv.appendTo(leftDiv);
     queueCapacity.appendTo(leftDiv);
     trashIcon.appendTo(rightDiv);
+    arrowIcon.appendTo(rightDiv);
 
     leftDiv.appendTo(progressBarContainer);
     rightDiv.appendTo(progressBarContainer);
 
     progressBarContainer.appendTo(chartBody);
-    interactiveDiv.appendTo(chartBody);
+    interactiveDiv.appendTo(interactiveWrap);
+    interactiveWrap.appendTo(chartBody);
     $('#chart-container').append(chartBody);
 
     $('<div class="tooltip-inner" id="line-chart-tooltip"></div>').css({
@@ -58,9 +63,8 @@ $(() => {
     $(`.progress-bar-container[data-queue='${name}`).on('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      $(this).next().toggle('slow', () => {
-        update();
-      });
+      $(this).parent().toggleClass('fold-card');
+      $(this).find('.fa-chevron-up').toggleClass('active');
     });
 
     $(`.delete-btn[data-delete='${name}`).on('click', (e) => {
@@ -82,8 +86,10 @@ $(() => {
         confirmButtonText: 'Yes, delete it!',
         cancelButtonText: 'No, cancel!',
         reverseButtons: true,
-      }).then(() => {
-        deleteQueue(name);
+      }).then((result) => {
+        if (result.isConfirmed) {
+          deleteQueue(name);
+        }
       });
     });
   }
@@ -161,7 +167,7 @@ $(() => {
                 xaxis: {
                   mode: 'time',
                   timeBase: 'miliseconds',
-                  timeformat: '%H:%M:%S',
+                  timeformat: '%H:%M',
                   show: true,
                 },
               },
