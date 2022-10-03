@@ -20,6 +20,7 @@ subscriber.subscribe(CHANNEL, () => {
 });
 
 subscriber.on('message', async (channel, message) => {
+  // FIXME: catch parse error
   const data = JSON.parse(message);
   const { method } = data;
   if (method === 'setMaster') {

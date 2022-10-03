@@ -76,7 +76,7 @@ class Queue extends EventEmitter {
       message: 'produce message',
       messages,
     });
-    console.log(`Produce queue: ${JSON.stringify(messages)}`);
+    console.log(`Produce ${this.name}: ${JSON.stringify(messages)}`);
 
     if (this.subscribers.length) {
       this.emit('consume');
@@ -115,7 +115,7 @@ class Queue extends EventEmitter {
       success: true,
       messages,
     });
-    console.log(`Consume queue: ${JSON.stringify(messages)}`);
+    console.log(`Consume ${this.name}: ${JSON.stringify(messages)}`);
     return messages;
   }
 
@@ -128,6 +128,7 @@ class Queue extends EventEmitter {
       queue: this.name,
       success: true,
     });
+    console.log(`Delete ${this.name}`);
   }
 }
 
