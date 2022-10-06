@@ -23,6 +23,7 @@ class Turtlekeeper {
     this.client.end();
   }
 
+  // FIXME: don't need promise, and call connect in constructor
   async connect() {
     return new Promise((resolve, reject) => {
       const client = this.socket.connect(this.config);

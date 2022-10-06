@@ -8,12 +8,6 @@ const { getCurrentIp, deleteQueues } = require('./util');
 const { PORT, CHANNEL, QUEUE_LIST } = process.env;
 let ip;
 
-(async () => {
-  ip = await getCurrentIp();
-  await group.init();
-  await group.createReplicaConnections();
-})();
-
 const subscriber = redis.duplicate();
 subscriber.subscribe(CHANNEL, () => {
   console.log(`subscribe channel: ${CHANNEL}`);
@@ -45,20 +39,11 @@ subscriber.on('message', async (channel, message) => {
   }
 });
 
-function createTurtleMQServer(requestHandler) {
-  const server = net.createServer((connection) => {
-    connection.on('error', () => {
-      console.log('client disconnect forcefully');
-    });
-    connection.on('end', () => {
-      // console.log('client disconnect');
-    });
-  });
-
-  function connectionHandler(socket) {
+function getConnectionHandler(requestHandler) {
+  return (socket) => {
     let reqBuffer = Buffer.from('');
     socket.on('data', (buf) => {
-      // const buf = socket.read();
+    // const buf = socket.read();
       if (!buf) return;
       reqBuffer = Buffer.concat([reqBuffer, buf]);
 
@@ -78,7 +63,7 @@ function createTurtleMQServer(requestHandler) {
           body,
           socket,
           send(data) {
-            // console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
+          // console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
             const message = `${JSON.stringify(data)}\r\n\r\n`;
             socket.write(message);
           },
@@ -95,8 +80,20 @@ function createTurtleMQServer(requestHandler) {
       console.log('socket error ');
     });
     socket.write('{ "message": "connected" }\r\n\r\n');
-  }
+  };
+}
 
+function createTurtleMQServer(requestHandler) {
+  const server = net.createServer((connection) => {
+    connection.on('error', () => {
+      console.log('client disconnect forcefully');
+    });
+    connection.on('end', () => {
+      // console.log('client disconnect');
+    });
+  });
+
+  const connectionHandler = getConnectionHandler(requestHandler);
   server.on('connection', connectionHandler);
   return server;
 }
@@ -104,9 +101,11 @@ function createTurtleMQServer(requestHandler) {
 const webServer = createTurtleMQServer(async (req) => {
   // console.log(`\n${new Date().toISOString()} - Request: ${JSON.stringify(req.body)}`);
   const { method } = req.body;
-  req.role = group.role;
+
   // response self role only
   if (method === 'heartbeat') {
+    const { setRole } = req.body;
+    group.role = setRole;
     return req.send({
       success: true,
       id: req.body.id,
@@ -115,12 +114,14 @@ const webServer = createTurtleMQServer(async (req) => {
       ip,
     });
   }
+  req.role = group.role;
   if (group.role === 'master') {
     group.send(req.body);
   }
   return queueRoutes[method](req);
 });
 
-webServer.listen(PORT, () => {
+webServer.listen(PORT, async () => {
+  ip = await getCurrentIp();
   console.log(`server is listen on prot ${PORT}....`);
 });

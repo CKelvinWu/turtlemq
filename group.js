@@ -9,6 +9,8 @@ const Turtlekeeper = require('./connection');
 const ROLE = process.env.ROLE || 'replica';
 
 const randomId = () => crypto.randomBytes(8).toString('hex');
+
+// Lazy function
 async function createConnection(config) {
   const turtleKeeper = new Turtlekeeper(config);
   const connection = await turtleKeeper.connect();
@@ -20,6 +22,8 @@ class Group {
     this.queueChannels = {};
     this.connections = [];
     this.id = randomId();
+    this.init();
+    this.createReplicaConnections();
   }
 
   async init() {
