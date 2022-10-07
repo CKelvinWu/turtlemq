@@ -1,22 +1,18 @@
 const net = require('net');
 
-class Turtlekeeper {
+class SocketConnection {
   constructor(config) {
     this.config = config;
     this.unhealthyCount = 0;
     this.socket = new net.Socket();
     this.socket.setKeepAlive(true, 5000);
+    this.connect();
   }
 
-  async reconnect() {
+  reconnect() {
     setTimeout(async () => {
-      await this.connect(this.config);
-      // reconnect timeout
+      this.connect();
     }, 3000);
-  }
-
-  send(messages) {
-    this.client.write(`${JSON.stringify(messages)}\r\n\r\n`);
   }
 
   end() {
@@ -24,42 +20,20 @@ class Turtlekeeper {
   }
 
   // FIXME: don't need promise, and call connect in constructor
-  async connect() {
-    return new Promise((resolve, reject) => {
-      const client = this.socket.connect(this.config);
-      let reqBuffer = Buffer.from('');
-      client.on('data', (buf) => {
-        // const buf = client.read();
-        if (!buf) return;
-        reqBuffer = Buffer.concat([reqBuffer, buf]);
+  connect() {
+    this.client = this.socket.connect(this.config);
 
-        while (true) {
-          if (reqBuffer === null) break;
-          // Indicating end of a request
-          const marker = reqBuffer.indexOf('\r\n\r\n');
-          // Find no seperator
-          if (marker === -1) break;
-          // Record the data after \r\n\r\n
-          const reqHeader = reqBuffer.slice(0, marker).toString();
-          // Keep hte extra readed data in the reqBuffer
-          reqBuffer = reqBuffer.slice(marker + 4);
-
-          const object = JSON.parse(reqHeader);
-          if (object.message === 'connected') {
-            resolve(this);
-          }
-          reject();
-        }
-      });
-
-      client.on('error', (error) => {
-        console.log(error);
-      });
-      client.on('end', () => {
-        // console.log('disconnected from server');
-      });
-      this.client = client;
+    this.client.on('error', (error) => {
+      console.log(error);
     });
+
+    this.client.on('end', () => {
+      // console.log('disconnected from server');
+    });
+  }
+
+  send(messages) {
+    this.client.write(`${JSON.stringify(messages)}\r\n\r\n`);
   }
 
   disconnect() {
@@ -67,4 +41,4 @@ class Turtlekeeper {
   }
 }
 
-module.exports = Turtlekeeper;
+module.exports = SocketConnection;

@@ -1,7 +1,7 @@
 require('dotenv');
 const EventEmitter = require('node:events');
 const { redis } = require('./redis');
-const group = require('./group');
+const channel = require('./channel');
 const { deleteQueues } = require('./util');
 
 const {
@@ -121,7 +121,7 @@ class Queue extends EventEmitter {
 
   delete(req) {
     // const name = req.body.queue;
-    delete group.queueChannels[this.name];
+    delete channel.queueChannels[this.name];
     req.send({
       id: req.body.id,
       method: 'delete',
@@ -133,16 +133,16 @@ class Queue extends EventEmitter {
 }
 
 const saveHistory = async () => {
-  if (group.role !== 'master') {
+  if (channel.role !== 'master') {
     setTimeout(() => {
       saveHistory();
     }, 5000);
     return;
   }
-  const keys = Object.keys(group.queueChannels);
+  const keys = Object.keys(channel.queueChannels);
   keys.forEach(async (name) => {
     const currentTime = Date.now();
-    const queueSize = group.queueChannels[name].getQueueLength();
+    const queueSize = channel.queueChannels[name].getQueueLength();
     const historyKey = HISTORY_KEY + name;
     const latestHistory = await redis.lindex(historyKey, -1);
 
@@ -186,14 +186,14 @@ const saveHistory = async () => {
 
 // create queue if not exist
 const createQueue = (name, maxLength = 0) => {
-  if (!group.queueChannels[name]) {
-    group.queueChannels[name] = new Queue(name);
+  if (!channel.queueChannels[name]) {
+    channel.queueChannels[name] = new Queue(name);
   }
-  if (!group.queueChannels[name].isSettedMaxLength && maxLength) {
-    group.queueChannels[name].setMaxLength(maxLength);
+  if (!channel.queueChannels[name].isSettedMaxLength && maxLength) {
+    channel.queueChannels[name].setMaxLength(maxLength);
     redis.hset(QUEUE_LIST, name, maxLength);
   }
-  return group.queueChannels[name];
+  return channel.queueChannels[name];
 };
 
 const produce = (req) => {

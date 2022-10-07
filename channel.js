@@ -4,20 +4,13 @@ const {
   stringToHostAndPort, getCurrentIp, setMaster,
   setPending, publishToChannel, getReplicasConfig,
 } = require('./util');
-const Turtlekeeper = require('./connection');
+const SocketConnection = require('./connection');
 
 const ROLE = process.env.ROLE || 'replica';
 
 const randomId = () => crypto.randomBytes(8).toString('hex');
 
-// Lazy function
-async function createConnection(config) {
-  const turtleKeeper = new Turtlekeeper(config);
-  const connection = await turtleKeeper.connect();
-  return connection;
-}
-
-class Group {
+class Channel {
   constructor() {
     this.queueChannels = {};
     this.connections = [];
@@ -50,7 +43,7 @@ class Group {
     }
     const replicasConfig = await getReplicasConfig();
     replicasConfig.forEach(async (replicaConfig) => {
-      const connection = await createConnection(replicaConfig);
+      const connection = new SocketConnection(replicaConfig);
       this.connections.push(connection);
       this.setQueue(connection);
     });
@@ -61,7 +54,7 @@ class Group {
       return;
     }
     const replicaConfig = stringToHostAndPort(ip);
-    const connection = await createConnection(replicaConfig);
+    const connection = new SocketConnection(replicaConfig);
     this.connections.push(connection);
     this.setQueue(connection);
   }
@@ -78,5 +71,5 @@ class Group {
     }
   }
 }
-const group = new Group();
-module.exports = group;
+const channel = new Channel();
+module.exports = channel;

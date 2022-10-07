@@ -1,43 +1,10 @@
 require('dotenv').config();
+require('./subscriber');
 const net = require('net');
 const queueRoutes = require('./queue');
-const group = require('./group');
-const { redis } = require('./redis');
-const { getCurrentIp, deleteQueues } = require('./util');
+const channel = require('./channel');
 
-const { PORT, CHANNEL, QUEUE_LIST } = process.env;
-let ip;
-
-const subscriber = redis.duplicate();
-subscriber.subscribe(CHANNEL, () => {
-  console.log(`subscribe channel: ${CHANNEL}`);
-});
-
-subscriber.on('message', async (channel, message) => {
-  // FIXME: catch parse error
-  const data = JSON.parse(message);
-  const { method } = data;
-  if (method === 'setMaster') {
-    if (ip === data.ip) {
-      group.role = 'master';
-      console.log('\n====================\nI am the new master\n====================\n');
-      // create connection to all replicas
-      await group.createReplicaConnections();
-
-      const queueList = await redis.hkeys(QUEUE_LIST);
-      const keys = Object.keys(group.queueChannels);
-      const removeKeys = queueList.filter((queue) => !keys.includes(queue));
-      for (const key of removeKeys) {
-        deleteQueues(key);
-      }
-    }
-  } else if (method === 'join') {
-    if (group.role === 'master' && data.role !== 'master') {
-      // Create a connection to new replica
-      await group.createReplicaConnection(data.ip);
-    }
-  }
-});
+const { PORT } = process.env;
 
 function getConnectionHandler(requestHandler) {
   return (socket) => {
@@ -105,23 +72,22 @@ const webServer = createTurtleMQServer(async (req) => {
   // response self role only
   if (method === 'heartbeat') {
     const { setRole } = req.body;
-    group.role = setRole;
+    channel.role = setRole;
     return req.send({
       success: true,
       id: req.body.id,
-      role: group.role,
+      role: channel.role,
       method,
-      ip,
+      ip: channel.ip,
     });
   }
-  req.role = group.role;
-  if (group.role === 'master') {
-    group.send(req.body);
+  req.role = channel.role;
+  if (channel.role === 'master') {
+    channel.send(req.body);
   }
   return queueRoutes[method](req);
 });
 
 webServer.listen(PORT, async () => {
-  ip = await getCurrentIp();
   console.log(`server is listen on prot ${PORT}....`);
 });
