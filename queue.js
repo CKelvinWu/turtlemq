@@ -1,6 +1,6 @@
 require('dotenv');
 const EventEmitter = require('node:events');
-const { redis } = require('./redis');
+const { redis } = require('./cache');
 const channel = require('./channel');
 const { deleteQueues } = require('./util');
 
