@@ -1,6 +1,6 @@
 const http = require('http');
 require('dotenv').config();
-const { redis } = require('./cache');
+const { redis } = require('./cache/cache');
 
 const {
   NODE_ENV, PORT, MASTER_KEY, REPLICA_KEY, PENDING_KEY, CHANNEL, QUEUE_LIST, HISTORY_KEY,
@@ -54,6 +54,11 @@ const deleteQueues = (name) => {
   redis.del(historyKey);
 };
 
+async function setRole(ip) {
+  const role = await redis.setRole(2, MASTER_KEY, REPLICA_KEY, ip);
+  return role;
+}
+
 module.exports = {
   stringToHostAndPort,
   getCurrentIp,
@@ -63,4 +68,5 @@ module.exports = {
   publishToChannel,
   getReplicasConfig,
   deleteQueues,
+  setRole,
 };

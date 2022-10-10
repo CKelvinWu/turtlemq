@@ -1,4 +1,4 @@
-const { redis } = require('./cache');
+const { redis } = require('./cache/cache');
 const channel = require('./channel');
 const { deleteQueues } = require('./util');
 
@@ -28,6 +28,7 @@ subscriber.on('message', async (ch, message) => {
       }
     }
   } else if (method === 'join') {
+    console.log(`channel.role:${channel.role},  data.role:${data.role}`);
     if (channel.role === 'master' && data.role !== 'master') {
       // Create a connection to new replica
       await channel.createReplicaConnection(data.ip);

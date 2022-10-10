@@ -1,5 +1,6 @@
-const Redis = require('ioredis');
 require('dotenv').config();
+const Redis = require('ioredis');
+const { setRoleScript } = require('./scripts');
 
 const env = process.env.NODE_ENV || 'production';
 
@@ -27,5 +28,6 @@ const redisConf = {
   },
 };
 const redis = new Redis(redisConf[env]);
+redis.defineCommand('setRole', { lua: setRoleScript });
 
 module.exports = { redis };

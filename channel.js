@@ -1,8 +1,8 @@
 require('dotenv').config();
 const crypto = require('crypto');
 const {
-  stringToHostAndPort, getCurrentIp, setMaster,
-  setPending, publishToChannel, getReplicasConfig,
+  stringToHostAndPort, getCurrentIp,
+  setPending, publishToChannel, getReplicasConfig, setRole,
 } = require('./util');
 const SocketConnection = require('./connection');
 
@@ -16,15 +16,14 @@ class Channel {
     this.connections = [];
     this.id = randomId();
     this.init();
-    this.createReplicaConnections();
   }
 
   async init() {
     // FIXME: shuld handle race condition and unhealthy replica
     this.ip = await getCurrentIp();
     if (ROLE === 'master') {
-      await setMaster(this.ip);
-      this.role = ROLE;
+      const role = await setRole(this.ip);
+      this.role = role;
       const message = { method: 'join', ip: this.ip, role: this.role };
       await publishToChannel(message);
       return;
@@ -35,6 +34,7 @@ class Channel {
     await setPending(this.ip);
     const message = { method: 'join', ip: this.ip, role: this.role };
     await publishToChannel(message);
+    this.createReplicaConnections();
   }
 
   async createReplicaConnections() {
