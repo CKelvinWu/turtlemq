@@ -2,9 +2,9 @@ const express = require('express');
 
 const router = express.Router();
 const { login, monitor } = require('../controllers/monitor');
-const { auth } = require('../utils/auth');
+const { authPage } = require('../utils/auth');
 
-router.get('/', auth, monitor);
+router.get('/', authPage, monitor);
 
 router.get('/login', login);
 

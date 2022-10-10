@@ -10,6 +10,6 @@ router.post('/login', login);
 
 router.get('/logout', logout);
 
-router.put('/password', changePassword);
+router.put('/password', auth, changePassword);
 
 module.exports = router;

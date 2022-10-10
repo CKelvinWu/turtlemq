@@ -4,13 +4,14 @@ const router = express.Router();
 const {
   queueInfo, produce, consume, deleteQueue,
 } = require('../controllers/queue');
+const { auth } = require('../utils/auth');
 
-router.get('/', queueInfo);
+router.get('/', auth, queueInfo);
 
-router.post('/produce', produce);
+router.post('/produce', auth, produce);
 
-router.post('/consume', consume);
+router.post('/consume', auth, consume);
 
-router.post('/delete', deleteQueue);
+router.post('/delete', auth, deleteQueue);
 
 module.exports = router;

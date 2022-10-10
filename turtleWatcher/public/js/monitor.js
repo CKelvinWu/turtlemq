@@ -311,10 +311,8 @@ $(() => {
               newPassword: $('#newPassword').val(),
             }),
           }).done((result) => {
-            console.log(result);
-            Swal.fire(`${result.responseJSON.message}`);
+            Swal.fire(`${result.message}`);
           }).fail((result) => {
-            console.log(result.responseJSON.message);
             Swal.fire(`${result.responseJSON.message}`);
           });
         }
