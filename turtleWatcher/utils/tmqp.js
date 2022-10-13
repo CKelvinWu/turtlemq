@@ -1,6 +1,6 @@
 // FIXME: change to npm package
 require('dotenv').config();
-const Tmqp = require('../../../tmqp/tmqp');
+const Tmqp = require('tmqp-client');
 
 const { TMQP_HOST, TMQP_PORT, CLUSTER_MODE } = process.env;
 

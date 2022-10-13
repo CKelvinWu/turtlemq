@@ -25,22 +25,26 @@ function getConnectionHandler(requestHandler) {
         // Keep hte extra readed data in the reqBuffer
         reqBuffer = reqBuffer.slice(marker + 4);
 
-        const body = JSON.parse(reqHeader);
-        const request = {
-          body,
-          socket,
-          send(data) {
-          // console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
-            const message = `${JSON.stringify(data)}\r\n\r\n`;
-            socket.write(message);
-          },
-          end() {
-            socket.end();
-          },
-        };
+        try {
+          const body = JSON.parse(reqHeader);
+          const request = {
+            body,
+            socket,
+            send(data) {
+            // console.log(`\n${new Date().toISOString()} - Response: ${JSON.stringify(data)}`);
+              const message = `${JSON.stringify(data)}\r\n\r\n`;
+              socket.write(message);
+            },
+            end() {
+              socket.end();
+            },
+          };
 
-        // Send the request to the handler
-        requestHandler(request);
+          // Send the request to the handler
+          requestHandler(request);
+        } catch (error) {
+          console.log(error);
+        }
       }
     });
     socket.on('error', () => {

@@ -17,6 +17,7 @@
     "express-async-handler": "^1.2.0",
     "express-session": "^1.17.3",
     "ioredis": "^5.2.3",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "tmqp-client": "^1.0.2"
   }
 }
