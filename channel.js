@@ -6,7 +6,9 @@ const {
 } = require('./util');
 const SocketConnection = require('./connection');
 
-const ROLE = process.env.ROLE || 'replica';
+// const ROLE = process.env.ROLE || 'replica';
+const CLUSTER_MODE = process.env.CLUSTER_MODE || 'off';
+const ROLE = CLUSTER_MODE === 'on' ? 'replica' : 'master';
 
 const randomId = () => crypto.randomBytes(8).toString('hex');
 
@@ -19,7 +21,6 @@ class Channel {
   }
 
   async init() {
-    // FIXME: shuld handle race condition and unhealthy replica
     this.ip = await getCurrentIp();
     if (ROLE === 'master') {
       const role = await setRole(this.ip);

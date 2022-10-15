@@ -19,7 +19,6 @@ class SocketConnection {
     this.client.end();
   }
 
-  // FIXME: don't need promise, and call connect in constructor
   connect() {
     this.client = this.socket.connect(this.config);
 
