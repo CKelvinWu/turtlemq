@@ -149,7 +149,7 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 2. Start a TurtleFinder
 
   ```shell
-    docker run -dit -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> kelvin5363/turtlefinder 
+    docker run -dit -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> -p 25566:25566 kelvin5363/turtlefinder 
   ```
 
 3. Start a server
