@@ -32,7 +32,7 @@ jobs:
     - name: Build turtlewatcher and export to Docker
       uses: docker/build-push-action@v3
       with:
-        context: .
+        context: ./turtleWatcher
         file: ./turtleWatcher/Dockerfile
         push: true
         tags: ${{secrets.DOCKER_USER}}/turtlewatcher:${{ steps.var.outputs.tags }} , ${{secrets.DOCKER_USER}}/turtlewatcher:latest
