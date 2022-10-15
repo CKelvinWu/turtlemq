@@ -33,6 +33,6 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: ./Dockerfile
+        file: ./turtleWatcher/Dockerfile
         push: true
         tags: ${{secrets.DOCKER_USER}}/turtlewatcher:${{ steps.var.outputs.tags }} , ${{secrets.DOCKER_USER}}/turtlewatcher:latest
