@@ -7,6 +7,19 @@
   --danger-hover: #ad2e24;
 }
 
+@font-face {
+  font-family: 'Want Coffee';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Want Coffee'), url('../fonts/WantCoffee-mLaYm.woff') format('woff');
+}
+
+@font-face{
+  font-family:pf din text cond pro medium;
+  font-style:normal;
+  font-weight:500;
+  src:local('PF Din Text Cond Pro Medium'),url('../fonts/PFDinTextCondPro-Medium.woff') format('woff')}
+
 * { 
   font-family: 'PF Din Text Cond Pro Medium', sans-serif;
 }
