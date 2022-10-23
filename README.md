@@ -112,23 +112,51 @@ A message queue storage server. The messages will be stored in both master and r
 **Cache:** Redis (ElastiCache)
 
 
+
 # How to Start the TurtleMQ Service
 
 There are two modes to start a TurtleMQ service.
 
 ## normal mode
 
-1. Start a server
+1. Start a TurtleMQ server
 
   ```shell
     docker run -dit -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> -p 5566:5566 kelvin5363/turtlemq
   ```
+  
+  Environment Variables  | Discription | Default |
+  ----------- | -------- |---------------|
+  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  PORT        | TurtleMQ server port | 5566 |
+  DEFAULT_QUEUE_LENGTH | Message queue default length | 1000 |
+  MIN_KEEPED_HISTROY_TIME | How long you wanna keeped queue history time (ms) | 3600000 |
+  HISTORY_INTERVAL | History saved interval | 5000 |
+  CLUSTER_MODE | Set `on` to enable cluster mode | off |
+  REDIS_HOST| Redis host | localhost |
+  REDIS_PORT| Redis port | 6379 |
+  REDIS_USER| Redis user | default |
+  REDIS_PASSWORD| Redis password | |
 
-2. Start a TurtleWatcher
+
+2. Start a Turtle Watcher
 
   ```shell
     docker run -dit -e TMQP_HOST=<host-ip> -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> -e SESSION_SECRET=<session-secret> -p 15566:15566 kelvin5363/turtlewatcher
   ```
+  
+  Environment Variables  | Discription | Default |
+  ----------- | -------- |---------------|
+  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  PORT        | Turtle Watcher server port | 15566 |
+  SESSION_SECRET | For signing the session ID cookie | |
+  CLUSTER_MODE | Set `on` to enable cluster mode | off |
+  TMQP_HOST| In cluster mode please set to the Turtle Finder's host. In normal mode please set to the TurtleMQ master server host. | localhost |
+  TMQP_PORT| In cluster mode please set to the Turtle Finder's port. In normal mode please set to the TurtleMQ master server port. | 5566 |
+  REDIS_HOST| Redis host | localhost |
+  REDIS_PORT| Redis port | 6379 |
+  REDIS_USER| Redis user | default |
+  REDIS_PASSWORD| Redis password | |
 
 3. Install tmqp-client in your application
 
@@ -146,11 +174,34 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
     docker run -dit -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> kelvin5363/turtlekeeper  
   ```
 
-2. Start a TurtleFinder
+  Environment Variables  | Discription | Default |
+  ----------- | -------- |---------------|
+  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  HOST        | Turtlekeeper host | localhost |
+  PORT        | Turtlekeeper port | 25566 |
+  REDIS_HOST  | Redis host | localhost |
+  REDIS_PORT  | Redis port | 6379 |
+  REDIS_USER  | Redis user | default |
+  REDIS_PASSWORD| Redis password | |
+  QUORUM      | The quorum is the number of Turtlekeeper that need to agree about the fact the master is not reachable | 2 |
+  HEARTRATE   | The interval of the heartbeat signal for checking the TurtleMQ servers health  | 3 |
+  UNHEALTHY_COUNT| The failure heartbeat times need to be reached to vote an unhealthy TurtleMQ server | 3 |
+
+
+2. Start a Turtle Finder
 
   ```shell
-    docker run -dit -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> -p 25566:25566 kelvin5363/turtlefinder 
+    docker run -dit -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> kelvin5363/turtlefinder 
   ```
+
+  Environment Variables  | Discription | Default |
+  ----------- | -------- |---------------|
+  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  PORT        | Turtle Finder port | 25566 |
+  REDIS_HOST| Redis host | localhost |
+  REDIS_PORT| Redis port | 6379 |
+  REDIS_USER| Redis user | default |
+  REDIS_PASSWORD| Redis password | |
 
 3. Start a server
 
@@ -158,11 +209,37 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
     docker run -dit -e PORT=<port> -e CLUSTER_MODE=on -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> -p <port>:<port>kelvin5363/turtlemq
   ```
 
-4. Start a TurtleWatcher
+  Environment Variables  | Discription | Default |
+  ----------- | -------- |---------------|
+  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  PORT        | TurtleMQ server port | 5566 |
+  DEFAULT_QUEUE_LENGTH | Message queue default length | 1000 |
+  MIN_KEEPED_HISTROY_TIME | How long you wanna keeped queue history time (ms) | 3600000 |
+  HISTORY_INTERVAL | History saved interval | 5000 |
+  CLUSTER_MODE | Set `on` to enable cluster mode | off |
+  REDIS_HOST| Redis host | localhost |
+  REDIS_PORT| Redis port | 6379 |
+  REDIS_USER| Redis user | default |
+  REDIS_PASSWORD| Redis password | |
+
+4. Start a Turtle Watcher
 
   ```shell
     docker run -dit --name turtlewatcher -e CLUSTER_MODE=on -e TMQP_HOST=<turtle-finder-host> -e TMQP_PORT=<turtle-finder-port> -e REDIS_HOST=<redis-host> -e REDIS_PASSWORD=<redis-password> -e SESSION_SECRET=<session-secret> -p 15566:15566 kelvin5363/turtlewatcher
   ```
+
+  Environment Variables  | Discription | Default |
+  ----------- | -------- |---------------|
+  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  PORT        | Turtle Watcher server port | 15566 |
+  SESSION_SECRET | For signing the session ID cookie | |
+  CLUSTER_MODE | Set `on` to enable cluster mode | off |
+  TMQP_HOST| In cluster mode please set to the Turtle Finder's host. In normal mode please set to the TurtleMQ master server host. | localhost |
+  TMQP_PORT| In cluster mode please set to the Turtle Finder's port. In normal mode please set to the TurtleMQ master server port. | 5566 |
+  REDIS_PORT| Redis port | 6379 |
+  REDIS_HOST| Redis host | localhost |
+  REDIS_USER| Redis user | default |
+  REDIS_PASSWORD| Redis password | |
 
 5. Install tmqp-client in your application
 
