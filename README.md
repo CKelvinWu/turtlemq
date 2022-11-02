@@ -263,4 +263,8 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 
 # Contact
 
-c.kelvin.wu@gmail.com
+Thank you for using tmqp-client :-)
+
+Email: c.kelvin.wu@gmail.com
+
+Linkedin: https://www.linkedin.com/in/chung-kai-wu/
