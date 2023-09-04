@@ -19,7 +19,7 @@ monitor, and a client npm package
 
 # Links
 
-[Turtle Watcher](https://turtlemq.com)
+[Turtle Watcher](http://turtlemq.com)
 
 ## Default Account
 Username  | Password |
@@ -44,7 +44,7 @@ turtle    | turtle |
 * [*Turtlekeeper*](https://github.com/CKelvinWu/turtlekeeper) a health checking server to 
   vote unhealthy server down with Redis in Lua script 
 
-* [*Turtle Finder*](https://github.com/CKelvinWu/turtlekeeper/tree/main/turtleFinder) a http server locating IP of *TurtleMQ* master 
+* [*Turtle Finder*](https://github.com/CKelvinWu/turtlekeeper/tree/main/turtleFinder) a HTTP server locating IP of *TurtleMQ* master 
 
 * [*Turtle Watcher*](https://github.com/CKelvinWu/turtlemq/tree/main/turtleWatcher) a surveillance dashboard 
   for monitoring queue size, storage, and server status 
@@ -63,7 +63,7 @@ turtle    | turtle |
 
 ## Services
 
-TurtleMQ contains five services. Each of them perform their duties and communicate with 
+TurtleMQ contains five services. Each of them performs their duties and communicates with 
 Turtle Message Queue Protocol (TMQP).
 
 ### TurtleMQ
@@ -71,26 +71,26 @@ A message queue storage server. The messages will be stored in both master and r
 
   * Master: 
 
-    1. Handle incomming produce, consume, delete ... requests from clients.
+    1. Handle incoming produce, consume, delete ... requests from clients.
 
     2. Forward requests to the replicas.
 
-    3. Create connections and delivered queues and messages to new joined replicas. 
+    3. Create connections and deliver queues and messages to newly joined replicas. 
     
   * Replica: 
 
-    1. Handle incomming produce, consume, delete ... requests from master.
+    1. Handle incoming produce, consume, delete ... requests from master.
 
     2. Become a master if been selected as master. 
 
 ### Turtlekeeper
 
-  A health checking and role setting server. Checking TurtleMQ servers health by 
+  A health-checking and role-setting server. Checking TurtleMQ servers' health by 
   sending heartbeats. Holding elections for unhealthy servers and remove
 
 ### Turtle Finder
 
-  The TurtleMQ master server can be changed due to poor network or upexpected crush.
+  The TurtleMQ master server can be changed due to poor network or unexpected crushes.
   The Turtle Finder server helps to locate the current TurtleMQ master IP.
 
 ### Turtle Watcher
@@ -127,10 +127,10 @@ There are two modes to start a TurtleMQ service.
   
   Environment Variables  | Discription | Default |
   ----------- | -------- |---------------|
-  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  NODE_ENV    | `development` for regular Redis connection, `production` for Redis TLS connection (Default)  | `production` |
   PORT        | TurtleMQ server port | 5566 |
   DEFAULT_QUEUE_LENGTH | Message queue default length | 1000 |
-  MIN_KEEPED_HISTROY_TIME | How long you wanna keeped queue history time (ms) | 3600000 |
+  MIN_KEEPED_HISTROY_TIME | How long you wanna keep queue history time (ms) | 3600000 |
   HISTORY_INTERVAL | History saved interval | 5000 |
   CLUSTER_MODE | Set `on` to enable cluster mode | off |
   REDIS_HOST| Redis host | localhost |
@@ -147,12 +147,12 @@ There are two modes to start a TurtleMQ service.
   
   Environment Variables  | Discription | Default |
   ----------- | -------- |---------------|
-  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  NODE_ENV    | `development` for regular Redis connection, `production` for Redis TLS connection (Default)  | `production` |
   PORT        | Turtle Watcher server port | 15566 |
   SESSION_SECRET | For signing the session ID cookie | |
   CLUSTER_MODE | Set `on` to enable cluster mode | off |
-  TMQP_HOST| In cluster mode please set to the Turtle Finder's host. In normal mode please set to the TurtleMQ master server host. | localhost |
-  TMQP_PORT| In cluster mode please set to the Turtle Finder's port. In normal mode please set to the TurtleMQ master server port. | 5566 |
+  TMQP_HOST| In cluster mode please set to the Turtle Finder's host. In normal mode please set it to the TurtleMQ master server host. | localhost |
+  TMQP_PORT| In cluster mode please set to the Turtle Finder's port. In normal mode please set it to the TurtleMQ master server port. | 5566 |
   REDIS_HOST| Redis host | localhost |
   REDIS_PORT| Redis port | 6379 |
   REDIS_USER| Redis user | default |
@@ -176,7 +176,7 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 
   Environment Variables  | Discription | Default |
   ----------- | -------- |---------------|
-  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  NODE_ENV    | `development` for regular Redis connection, `production` for Redis TLS connection (Default)  | `production` |
   HOST        | Turtlekeeper host | localhost |
   PORT        | Turtlekeeper port | 25566 |
   REDIS_HOST  | Redis host | localhost |
@@ -184,8 +184,8 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
   REDIS_USER  | Redis user | default |
   REDIS_PASSWORD| Redis password | |
   QUORUM      | The quorum is the number of Turtlekeeper that need to agree about the fact the master is not reachable | 2 |
-  HEARTRATE   | The interval of the heartbeat signal for checking the TurtleMQ servers health  | 3 |
-  UNHEALTHY_COUNT| The failure heartbeat times need to be reached to vote an unhealthy TurtleMQ server | 3 |
+  HEARTRATE   | The interval of the heartbeat signal for checking the TurtleMQ server's health  | 3 |
+  UNHEALTHY_COUNT| The failure heartbeat times need to be reached to vote for an unhealthy TurtleMQ server | 3 |
 
 
 2. Start a Turtle Finder
@@ -196,7 +196,7 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 
   Environment Variables  | Discription | Default |
   ----------- | -------- |---------------|
-  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  NODE_ENV    | `development` for regular Redis connection, `production` for Redis TLS connection (Default)  | `production` |
   PORT        | Turtle Finder port | 25566 |
   REDIS_HOST| Redis host | localhost |
   REDIS_PORT| Redis port | 6379 |
@@ -211,10 +211,10 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 
   Environment Variables  | Discription | Default |
   ----------- | -------- |---------------|
-  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  NODE_ENV    | `development` for regular Redis connection, `production` for Redis TLS connection (Default)  | `production` |
   PORT        | TurtleMQ server port | 5566 |
   DEFAULT_QUEUE_LENGTH | Message queue default length | 1000 |
-  MIN_KEEPED_HISTROY_TIME | How long you wanna keeped queue history time (ms) | 3600000 |
+  MIN_KEEPED_HISTROY_TIME | How long you wanna keep queue history time (ms) | 3600000 |
   HISTORY_INTERVAL | History saved interval | 5000 |
   CLUSTER_MODE | Set `on` to enable cluster mode | off |
   REDIS_HOST| Redis host | localhost |
@@ -230,7 +230,7 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 
   Environment Variables  | Discription | Default |
   ----------- | -------- |---------------|
-  NODE_ENV    | `development` for normal redis connectino, `production` for redis tls connection (Default)  | `production` |
+  NODE_ENV    | `development` for regular Redis connection, `production` for Redis TLS connection (Default)  | `production` |
   PORT        | Turtle Watcher server port | 15566 |
   SESSION_SECRET | For signing the session ID cookie | |
   CLUSTER_MODE | Set `on` to enable cluster mode | off |
@@ -251,12 +251,12 @@ See more for using [tmqp-client](https://www.npmjs.com/package/tmqp-client) to p
 
 # FAQ
 
-### Q1. Why Using Message Queue
+### Q1. Why Use Message Queue
 
 * Better Performance
 * Increased Reliability
 * Granular Scalability
-* Simplifed Decoupling
+* Simplified Decoupling
 * Break Up Apps
 * Migrate to Microservices
 * Shift to Serverless
